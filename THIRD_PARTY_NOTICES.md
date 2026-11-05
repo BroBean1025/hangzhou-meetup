@@ -12,7 +12,7 @@
 | 真实轨道轨迹、跨城规划模型 | `data/map.json` 的 segments、`config/regional-network.json` | 整理自高德规划/线路资料，属于第三方派生快照；不授予 MIT 数据许可 |
 | 校门接驳与跨站区步行资料 | `config/walking-snapshot.json`、`config/settings.json` 部分来源信息、前端估时快照 | 由高德规划及公开校区资料核实整理；不授予 MIT 数据许可 |
 | 校徽 | `data/school-*.png`、相应构建图片及截图中的标识 | 据项目作者说明，下载自浙江大学、浙江工业大学、西湖大学官网“文化标识”等相关栏目公开提供的资源；仅用于地点识别，不表示学校背书，权利归原权利人，不纳入 MIT 许可 |
-| 页面截图 | `docs/desktop.png`、`docs/mobile.png` | 包含上述地图数据与标识，其第三方权属随之保留 |
+| 页面截图 | `docs/screenshots/*.jpg`、`docs/desktop.png`、`docs/mobile.png` | 包含上述地图数据与标识，其第三方权属随之保留；README 演示图来自本项目实际界面 |
 
 地图页已经保留 OpenStreetMap 和 OpenMetro 署名。源码/数据快照与构建资源同时提供，方便追溯。地理坐标转换和格式整理不会自动消除原始数据的使用限制。
 
