@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+.dev.vars*
+node_modules
+docs
+tests
+src
+data
+scripts
+releases
+*.log
+*.zip
+*.tgz

@@ -1,0 +1,30 @@
+# Local secrets (only the empty example is public)
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+credentials*
+secrets*
+
+# Local state / tools / deploy bindings
+node_modules/
+.cache/
+cache/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+.openai/
+.wrangler/
+.codex/
+.agents/
+dist/
+coverage/
+releases/
+*.zip
+*.tar.gz
+*.tgz
+# public/ is deliberately tracked: download and start without a build.

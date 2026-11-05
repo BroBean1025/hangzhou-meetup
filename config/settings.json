@@ -1,0 +1,1463 @@
+{
+  "openmetro_base_url": "https://openmetro.dev",
+  "network_id": "cn-hangzhou",
+  "amap_key_env": "AMAP_WEB_SERVICE_KEY",
+  "timeout_seconds": 20,
+  "retries": 1,
+  "amap_min_interval_seconds": 1.1,
+  "cache_ttl_seconds": {
+    "metadata": 86400,
+    "route": 86400,
+    "geocode": 2592000,
+    "walking": 604800
+  },
+  "default_gate": "east",
+  "map_primary_campus": "yuquan",
+  "station_groups": [
+    {
+      "id": "hangzhou-east",
+      "name": "杭州东站",
+      "member_ids": [
+        "cn-hangzhou-east-railway-station",
+        "cn-hangzhou-east-railway-station-east-square"
+      ],
+      "aliases": [
+        "杭州东",
+        "杭州东站",
+        "火车东站",
+        "火车东站（东广场）",
+        "东广场"
+      ],
+      "connection_note": "杭州东起终点在两个站区择优；实际跨站区步行已纳入路线和总时间，高铁大厅、安检及候车另计。",
+      "source": "https://www.hzsc.com.cn/content/content_9872452.html",
+      "verified_on": "2026-11-04"
+    }
+  ],
+  "campuses": [
+    {
+      "id": "yuquan",
+      "name": "浙江大学玉泉校区",
+      "short_name": "浙大玉泉",
+      "origin_key": "north",
+      "gate_label": "北门",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "gate_options": [
+        {
+          "key": "north",
+          "label": "北门"
+        },
+        {
+          "key": "east",
+          "label": "东门"
+        },
+        {
+          "key": "yuquan_xinqiao",
+          "label": "新桥门"
+        },
+        {
+          "key": "yuquan_xiaoqiao",
+          "label": "小桥门"
+        },
+        {
+          "key": "yuquan_south",
+          "label": "南门"
+        },
+        {
+          "key": "yuquan_west",
+          "label": "西门"
+        }
+      ],
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "default_enabled": true,
+      "campus_name": "玉泉校区",
+      "catalog_source": "https://www.zju.edu.cn/550/list.htm"
+    },
+    {
+      "id": "yungu",
+      "name": "西湖大学云谷校区",
+      "short_name": "西湖云谷",
+      "origin_key": "yungu",
+      "gate_label": "北门",
+      "logo_file": "westlake-transparent.png",
+      "color": "#ae7138",
+      "gate_options": [
+        {
+          "key": "yungu",
+          "label": "北门"
+        },
+        {
+          "key": "yungu_1",
+          "label": "1号门"
+        },
+        {
+          "key": "yungu_2",
+          "label": "2号门"
+        },
+        {
+          "key": "yungu_3",
+          "label": "3号门"
+        },
+        {
+          "key": "yungu_7",
+          "label": "7号门"
+        }
+      ],
+      "school_id": "westlake",
+      "school_name": "西湖大学",
+      "default_enabled": true,
+      "campus_name": "云谷校区",
+      "catalog_source": "https://zh-ugadmissions.westlake.edu.cn/WhyWestlake/WestlakeCampus/"
+    },
+    {
+      "id": "pingfeng",
+      "name": "浙江工业大学屏峰校区",
+      "short_name": "浙工大屏峰",
+      "origin_key": "pingfeng",
+      "gate_label": "正南门",
+      "logo_file": "zjut-transparent.png",
+      "color": "#296b75",
+      "gate_options": [
+        {
+          "key": "pingfeng",
+          "label": "正南门"
+        },
+        {
+          "key": "pingfeng_s1",
+          "label": "南1门（生活区）"
+        },
+        {
+          "key": "pingfeng_s2",
+          "label": "南2门（1-A区）"
+        }
+      ],
+      "school_id": "zjut",
+      "school_name": "浙江工业大学",
+      "default_enabled": true,
+      "campus_name": "屏峰校区",
+      "catalog_source": "https://www.lib.zjut.edu.cn/xqdz/list.htm"
+    },
+    {
+      "id": "zijingang",
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "campus_name": "紫金港校区",
+      "name": "浙江大学紫金港校区",
+      "short_name": "浙大紫金港",
+      "origin_key": "zijingang_south1",
+      "gate_label": "南1门（南大门）",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "zijingang_south1",
+          "label": "南1门（南大门）"
+        },
+        {
+          "key": "zijingang_east1",
+          "label": "东1门"
+        },
+        {
+          "key": "zijingang_east2",
+          "label": "东2门"
+        },
+        {
+          "key": "zijingang_west1",
+          "label": "西1门"
+        },
+        {
+          "key": "zijingang_west2",
+          "label": "西2门"
+        },
+        {
+          "key": "zijingang_west3",
+          "label": "西3门"
+        }
+      ],
+      "catalog_source": "https://www.zju.edu.cn/550/list.htm",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近2个运营站比较",
+        "station_name": "浙大紫金港",
+        "distance_m": 676.0,
+        "seconds": 541.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "xixi",
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "campus_name": "西溪校区",
+      "name": "浙江大学西溪校区",
+      "short_name": "浙大西溪",
+      "origin_key": "xixi_south",
+      "gate_label": "南门",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "xixi_north",
+          "label": "北门"
+        },
+        {
+          "key": "xixi_south",
+          "label": "南门"
+        },
+        {
+          "key": "xixi_east",
+          "label": "东门"
+        }
+      ],
+      "catalog_source": "https://www.zju.edu.cn/550/list.htm",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近2个运营站比较",
+        "station_name": "黄龙洞",
+        "distance_m": 818.0,
+        "seconds": 654.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "huajiachi",
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "campus_name": "华家池校区",
+      "name": "浙江大学华家池校区",
+      "short_name": "浙大华家池",
+      "origin_key": "huajiachi_south",
+      "gate_label": "南门",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "huajiachi_west",
+          "label": "西门"
+        },
+        {
+          "key": "huajiachi_west2",
+          "label": "西2门"
+        },
+        {
+          "key": "huajiachi_south",
+          "label": "南门"
+        },
+        {
+          "key": "huajiachi_north",
+          "label": "北门"
+        }
+      ],
+      "catalog_source": "https://www.zju.edu.cn/550/list.htm",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近2个运营站比较",
+        "station_name": "庆菱路",
+        "distance_m": 1075.0,
+        "seconds": 860.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "zhijiang",
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "campus_name": "之江校区",
+      "name": "浙江大学之江校区",
+      "short_name": "浙大之江",
+      "origin_key": "zhijiang_main",
+      "gate_label": "正门",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "zhijiang_main",
+          "label": "正门"
+        },
+        {
+          "key": "zhijiang_back",
+          "label": "后门"
+        }
+      ],
+      "catalog_source": "https://www.zju.edu.cn/550/list.htm",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近5个运营站比较",
+        "station_name": "水澄桥",
+        "distance_m": 2995.0,
+        "seconds": 2396.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "zhaohui",
+      "school_id": "zjut",
+      "school_name": "浙江工业大学",
+      "campus_name": "朝晖校区",
+      "name": "浙江工业大学朝晖校区",
+      "short_name": "浙工大朝晖",
+      "origin_key": "zhaohui_southwest2",
+      "gate_label": "西南2门",
+      "logo_file": "zjut-transparent.png",
+      "color": "#296b75",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "zhaohui_south",
+          "label": "南门"
+        },
+        {
+          "key": "zhaohui_west1",
+          "label": "西1门"
+        },
+        {
+          "key": "zhaohui_north",
+          "label": "北门"
+        },
+        {
+          "key": "zhaohui_southeast",
+          "label": "东南门"
+        },
+        {
+          "key": "zhaohui_southwest2",
+          "label": "西南2门"
+        }
+      ],
+      "catalog_source": "https://www.lib.zjut.edu.cn/xqdz/list.htm",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近2个运营站比较",
+        "station_name": "潮王路",
+        "distance_m": 448.0,
+        "seconds": 358.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "yunqi",
+      "school_id": "westlake",
+      "school_name": "西湖大学",
+      "campus_name": "云栖校区",
+      "name": "西湖大学云栖校区",
+      "short_name": "西湖云栖",
+      "origin_key": "yunqi_south",
+      "gate_label": "南门",
+      "logo_file": "westlake-transparent.png",
+      "color": "#ae7138",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "yunqi_south",
+          "label": "南门"
+        },
+        {
+          "key": "yunqi_east",
+          "label": "东门"
+        }
+      ],
+      "catalog_source": "https://zh-ugadmissions.westlake.edu.cn/WhyWestlake/WestlakeCampus/",
+      "verified_on": "2026-11-04",
+      "default_gate_basis": {
+        "source": "高德步行路线；已收录校门各最近2个运营站比较",
+        "station_name": "科海路",
+        "distance_m": 959.0,
+        "seconds": 767.0,
+        "verified_on": "2026-11-04"
+      }
+    },
+    {
+      "id": "haining",
+      "school_id": "zju",
+      "school_name": "浙江大学",
+      "campus_name": "海宁国际校区",
+      "name": "浙江大学海宁国际校区",
+      "short_name": "浙大海宁",
+      "origin_key": "haining_south",
+      "gate_label": "南门",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "default_enabled": false,
+      "gate_options": [
+        {
+          "key": "haining_south",
+          "label": "南门"
+        },
+        {
+          "key": "haining_west",
+          "label": "西门"
+        },
+        {
+          "key": "haining_north",
+          "label": "北门"
+        },
+        {
+          "key": "haining_north1",
+          "label": "北1门"
+        },
+        {
+          "key": "haining_east",
+          "label": "东门"
+        }
+      ],
+      "catalog_source": "https://www.intl.zju.edu.cn/zh-hans/node/12447",
+      "verified_on": "2026-11-05",
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    }
+  ],
+  "origin_candidates": 5,
+  "destination_candidates": 3,
+  "max_station_distance_km": 2.5,
+  "daily_commute_warning_minutes": 60,
+  "origins": {
+    "east": {
+      "name": "浙江大学玉泉校区东门（正门建筑中心参考点）",
+      "location": {
+        "lon": 120.125521,
+        "lat": 30.261332,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/way/529027093",
+      "original_location": {
+        "lon": 120.120742425,
+        "lat": 30.26361365,
+        "crs": "wgs84"
+      },
+      "coordinate_note": "OSM 正门建筑四顶点平均值，经近似 WGS84→GCJ02 转换；非测绘控制点。",
+      "verified_on": "2026-11-04",
+      "walk_overrides": {}
+    },
+    "yungu": {
+      "name": "西湖大学云谷校区北门",
+      "location": {
+        "lon": 120.038775,
+        "lat": 30.339587,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/9936043041",
+      "coordinate_note": "OSM 北门入口近似转换至GCJ02；在已查到的校园入口中，到运营地铁的高德步行最短。未实地核实校门开放时段。",
+      "max_station_distance_km": 6,
+      "verified_on": "2026-11-04",
+      "walk_overrides": {}
+    },
+    "pingfeng": {
+      "name": "浙江工业大学屏峰校区正南门",
+      "location": {
+        "lon": 120.034864,
+        "lat": 30.222257,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B149VY",
+      "coordinate_note": "高德校园POI的entr_location；与OSM南门（浙工大正大门）位置核对。到屏峰站步行短于生活区南1门。",
+      "verified_on": "2026-11-04",
+      "walk_overrides": {}
+    },
+    "north": {
+      "name": "浙江大学玉泉校区北门",
+      "location": {
+        "lon": 120.124494,
+        "lat": 30.269522,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B189GU",
+      "verified_on": "2026-11-04",
+      "walk_overrides": {}
+    },
+    "yuquan_xinqiao": {
+      "name": "浙江大学玉泉校区新桥门",
+      "location": {
+        "lon": 120.12724,
+        "lat": 30.265274,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/5356012204",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yuquan_xiaoqiao": {
+      "name": "浙江大学玉泉校区小桥门",
+      "location": {
+        "lon": 120.126676,
+        "lat": 30.263861,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/5356012208",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yuquan_south": {
+      "name": "浙江大学玉泉校区南门",
+      "location": {
+        "lon": 120.120316,
+        "lat": 30.259064,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/5356012213",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yuquan_west": {
+      "name": "浙江大学玉泉校区西门",
+      "location": {
+        "lon": 120.119175,
+        "lat": 30.261446,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/5356012214",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yungu_1": {
+      "name": "西湖大学云谷校区1号门",
+      "location": {
+        "lon": 120.036529,
+        "lat": 30.329187,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/12805799156",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 6
+    },
+    "yungu_2": {
+      "name": "西湖大学云谷校区2号门",
+      "location": {
+        "lon": 120.03513,
+        "lat": 30.329293,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/9979412743",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 6
+    },
+    "yungu_3": {
+      "name": "西湖大学云谷校区3号门",
+      "location": {
+        "lon": 120.031609,
+        "lat": 30.330894,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/12805789083",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 6
+    },
+    "yungu_7": {
+      "name": "西湖大学云谷校区7号门",
+      "location": {
+        "lon": 120.041957,
+        "lat": 30.332538,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/9936043095",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 6
+    },
+    "pingfeng_s1": {
+      "name": "浙江工业大学屏峰校区南1门（生活区）",
+      "location": {
+        "lon": 120.041225,
+        "lat": 30.225608,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/3097119294",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "pingfeng_s2": {
+      "name": "浙江工业大学屏峰校区南2门（1-A区）",
+      "location": {
+        "lon": 120.048096,
+        "lat": 30.230101,
+        "crs": "gcj02"
+      },
+      "source": "https://www.openstreetmap.org/node/10114329903",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "OSM明确命名校门，坐标近似转换；开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_south1": {
+      "name": "浙江大学紫金港校区南1门（南大门）",
+      "location": {
+        "lon": 120.082144,
+        "lat": 30.295381,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFKEYT1Y",
+      "poi_name": "浙江大学紫金港校区(南1门)",
+      "poi_id": "B0FFKEYT1Y",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_east1": {
+      "name": "浙江大学紫金港校区东1门",
+      "location": {
+        "lon": 120.088706,
+        "lat": 30.308903,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFFDSZ12",
+      "poi_name": "浙江大学紫金港校区(东1门)",
+      "poi_id": "B0FFFDSZ12",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_east2": {
+      "name": "浙江大学紫金港校区东2门",
+      "location": {
+        "lon": 120.091734,
+        "lat": 30.304978,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0J03ZVVEC",
+      "poi_name": "浙江大学紫金港校区(东2门)",
+      "poi_id": "B0J03ZVVEC",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_west1": {
+      "name": "浙江大学紫金港校区西1门",
+      "location": {
+        "lon": 120.070124,
+        "lat": 30.303367,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0HDJHTVOA",
+      "poi_name": "浙江大学紫金港校区(西1门)",
+      "poi_id": "B0HDJHTVOA",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_west2": {
+      "name": "浙江大学紫金港校区西2门",
+      "location": {
+        "lon": 120.070628,
+        "lat": 30.301115,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0HDJATTL1",
+      "poi_name": "浙江大学紫金港校区(西2门)",
+      "poi_id": "B0HDJATTL1",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zijingang_west3": {
+      "name": "浙江大学紫金港校区西3门",
+      "location": {
+        "lon": 120.070501,
+        "lat": 30.29845,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0L2B5JSF0",
+      "poi_name": "浙江大学紫金港校区(西3门)",
+      "poi_id": "B0L2B5JSF0",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "xixi_north": {
+      "name": "浙江大学西溪校区北门",
+      "location": {
+        "lon": 120.140575,
+        "lat": 30.277225,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B08XO9",
+      "poi_name": "浙江大学西溪校区(北门)",
+      "poi_id": "B023B08XO9",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "xixi_south": {
+      "name": "浙江大学西溪校区南门",
+      "location": {
+        "lon": 120.140949,
+        "lat": 30.271857,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B092A6",
+      "poi_name": "浙江大学西溪校区(南门)",
+      "poi_id": "B023B092A6",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "xixi_east": {
+      "name": "浙江大学西溪校区东门",
+      "location": {
+        "lon": 120.144361,
+        "lat": 30.274084,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B092A5",
+      "poi_name": "浙江大学西溪校区(东门)",
+      "poi_id": "B023B092A5",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "huajiachi_west": {
+      "name": "浙江大学华家池校区西门",
+      "location": {
+        "lon": 120.191398,
+        "lat": 30.270663,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFFDCA7U",
+      "poi_name": "浙江大学华家池校区(西门)",
+      "poi_id": "B0FFFDCA7U",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "huajiachi_west2": {
+      "name": "浙江大学华家池校区西2门",
+      "location": {
+        "lon": 120.191606,
+        "lat": 30.266815,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B09WLO",
+      "poi_name": "浙江大学华家池校区(西2门)",
+      "poi_id": "B023B09WLO",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "huajiachi_south": {
+      "name": "浙江大学华家池校区南门",
+      "location": {
+        "lon": 120.197045,
+        "lat": 30.263844,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B0929Z",
+      "poi_name": "浙江大学华家池校区(南门)",
+      "poi_id": "B023B0929Z",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "huajiachi_north": {
+      "name": "浙江大学华家池校区北门",
+      "location": {
+        "lon": 120.193577,
+        "lat": 30.272877,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0MRT7YJQD",
+      "poi_name": "浙江大学华家池校区(北门)",
+      "poi_id": "B0MRT7YJQD",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zhijiang_main": {
+      "name": "浙江大学之江校区正门",
+      "location": {
+        "lon": 120.126411,
+        "lat": 30.192174,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B14DDT",
+      "poi_name": "浙江大学之江校区(正门)",
+      "poi_id": "B023B14DDT",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 5
+    },
+    "zhijiang_back": {
+      "name": "浙江大学之江校区后门",
+      "location": {
+        "lon": 120.123404,
+        "lat": 30.189609,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0IDPLRCFT",
+      "poi_name": "浙江大学之江校区(后门)",
+      "poi_id": "B0IDPLRCFT",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 5
+    },
+    "zhaohui_south": {
+      "name": "浙江工业大学朝晖校区南门",
+      "location": {
+        "lon": 120.166836,
+        "lat": 30.2903,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B092B4",
+      "poi_name": "浙江工业大学朝晖校区(南门)",
+      "poi_id": "B023B092B4",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zhaohui_west1": {
+      "name": "浙江工业大学朝晖校区西1门",
+      "location": {
+        "lon": 120.163176,
+        "lat": 30.292944,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B09WO3",
+      "poi_name": "浙江工业大学朝晖校区(西1门)",
+      "poi_id": "B023B09WO3",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zhaohui_north": {
+      "name": "浙江工业大学朝晖校区北门",
+      "location": {
+        "lon": 120.162931,
+        "lat": 30.295723,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B08S15",
+      "poi_name": "浙江工业大学朝晖校区(北门)",
+      "poi_id": "B023B08S15",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zhaohui_southeast": {
+      "name": "浙江工业大学朝晖校区东南门",
+      "location": {
+        "lon": 120.168738,
+        "lat": 30.292875,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B08S0Y",
+      "poi_name": "浙江工业大学朝晖校区(东南门)",
+      "poi_id": "B023B08S0Y",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "zhaohui_southwest2": {
+      "name": "浙江工业大学朝晖校区西南2门",
+      "location": {
+        "lon": 120.163138,
+        "lat": 30.29108,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B08U5P",
+      "poi_name": "浙江工业大学朝晖校区(西南2门)",
+      "poi_id": "B023B08U5P",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yunqi_south": {
+      "name": "西湖大学云栖校区南门",
+      "location": {
+        "lon": 120.080359,
+        "lat": 30.133536,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0LUXAIPFT",
+      "poi_name": "西湖大学云栖校区(南门)",
+      "poi_id": "B0LUXAIPFT",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "yunqi_east": {
+      "name": "西湖大学云栖校区东门",
+      "location": {
+        "lon": 120.081613,
+        "lat": 30.134049,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFKB2RXS",
+      "poi_name": "西湖大学云栖校区(东门)",
+      "poi_id": "B0FFKB2RXS",
+      "verified_on": "2026-11-04",
+      "coordinate_note": "高德 assistant/inputtips 返回的具名临街院门（991400/991401），经校区地址与地图入口核对；非校园中心，不代表校门开放承诺。",
+      "walk_overrides": {},
+      "max_station_distance_km": 2.5
+    },
+    "haining_south": {
+      "name": "浙江大学海宁国际校区南门",
+      "location": {
+        "lon": 120.725023,
+        "lat": 30.513998,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFKG9VBM",
+      "verified_on": "2026-11-05",
+      "coordinate_note": "高德明确命名校门POI；位置与官方校园图或OSM校门核对。开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 3,
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    },
+    "haining_west": {
+      "name": "浙江大学海宁国际校区西门",
+      "location": {
+        "lon": 120.720508,
+        "lat": 30.51881,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFL3W4QW",
+      "verified_on": "2026-11-05",
+      "coordinate_note": "高德明确命名校门POI；位置与官方校园图或OSM校门核对。开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 3,
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    },
+    "haining_north": {
+      "name": "浙江大学海宁国际校区北门",
+      "location": {
+        "lon": 120.726037,
+        "lat": 30.523543,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFI76U7W",
+      "verified_on": "2026-11-05",
+      "coordinate_note": "高德明确命名校门POI；位置与官方校园图或OSM校门核对。开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 3,
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    },
+    "haining_north1": {
+      "name": "浙江大学海宁国际校区北1门",
+      "location": {
+        "lon": 120.729491,
+        "lat": 30.523232,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFKNKH0N",
+      "verified_on": "2026-11-05",
+      "coordinate_note": "高德明确命名校门POI；位置与官方校园图或OSM校门核对。开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 3,
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    },
+    "haining_east": {
+      "name": "浙江大学海宁国际校区东门",
+      "location": {
+        "lon": 120.731775,
+        "lat": 30.520994,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0J2VAAZMB",
+      "verified_on": "2026-11-05",
+      "coordinate_note": "高德明确命名校门POI；位置与官方校园图或OSM校门核对。开放时段未实地核实。",
+      "walk_overrides": {},
+      "max_station_distance_km": 3,
+      "city": "嘉兴",
+      "citycode": "0573",
+      "adcode": "330481"
+    }
+  },
+  "places": [
+    {
+      "name": "杭州东站（东进站口参考点）",
+      "aliases": [
+        "杭州东站",
+        "杭州东站东进站口"
+      ],
+      "location": {
+        "lon": 120.214623,
+        "lat": 30.292279,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B023B1EQ98",
+      "verified_on": "2026-11-04",
+      "note": "以东进站口定位；不含高铁安检、候车与上楼时间。"
+    },
+    {
+      "name": "西湖文化广场（广场 POI）",
+      "aliases": [
+        "西湖文化广场"
+      ],
+      "location": {
+        "lon": 120.163755,
+        "lat": 30.276652,
+        "crs": "gcj02"
+      },
+      "source": "https://ditu.amap.com/place/B023B0BIT8",
+      "verified_on": "2026-11-04"
+    },
+    {
+      "name": "滨江星光大道步行街（江南大道228号）",
+      "aliases": [
+        "星光大道",
+        "滨江区星光大道",
+        "滨江星光大道"
+      ],
+      "location": {
+        "lon": 120.208066,
+        "lat": 30.209255,
+        "crs": "gcj02"
+      },
+      "source": "https://www.amap.com/place/B0FFHJDC3X",
+      "verified_on": "2026-11-04",
+      "note": "定位一期步行街；二期或具体商铺请指定地址。"
+    }
+  ],
+  "long_access_minutes": 20,
+  "station_connectors": [
+    {
+      "id": "east-hall-0",
+      "from_station_id": "cn-hangzhou-east-railway-station",
+      "to_station_id": "cn-hangzhou-east-railway-station-east-square",
+      "label": "杭州东站跨站区步行",
+      "seconds": 542.0,
+      "distance_m": 677.0,
+      "bidirectional": false,
+      "source": "高德步行路径规划（站点参考位置）",
+      "source_url": "https://lbs.amap.com/api/webservice/guide/api/direction",
+      "connection_source": "https://www.hzsc.com.cn/content/content_9872452.html",
+      "note": "按高德站点参考位置步行方案计时、绘图；官方到达大厅换乘约7分钟。具体室内通道、安检和开放情况以现场为准。",
+      "verified_on": "2026-11-04",
+      "geometry": {
+        "crs": "wgs84",
+        "source": "高德路径规划 polyline",
+        "parts": [
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2083934,
+                30.2935705
+              ],
+              [
+                120.2083413,
+                30.2936404
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2083373,
+                30.2936404
+              ],
+              [
+                120.2092945,
+                30.2942577
+              ],
+              [
+                120.2094208,
+                30.2943448
+              ],
+              [
+                120.2094599,
+                30.2943659
+              ],
+              [
+                120.2101555,
+                30.2948138
+              ],
+              [
+                120.2101996,
+                30.2948448
+              ],
+              [
+                120.2102558,
+                30.2948799
+              ],
+              [
+                120.2103079,
+                30.294914
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2103079,
+                30.294914
+              ],
+              [
+                120.21036,
+                30.294845
+              ],
+              [
+                120.2104121,
+                30.2948841
+              ],
+              [
+                120.2106687,
+                30.2950454
+              ],
+              [
+                120.2108341,
+                30.2950626
+              ],
+              [
+                120.2110255,
+                30.2951709
+              ],
+              [
+                120.2111959,
+                30.2952711
+              ],
+              [
+                120.2115998,
+                30.2955496
+              ],
+              [
+                120.2121571,
+                30.2958673
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2121571,
+                30.2958673
+              ],
+              [
+                120.2120789,
+                30.2959582
+              ],
+              [
+                120.2118694,
+                30.2962229
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2118654,
+                30.2962229
+              ],
+              [
+                120.212139,
+                30.2963572
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.212139,
+                30.2963572
+              ],
+              [
+                120.2123094,
+                30.2964314
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2123094,
+                30.2964314
+              ],
+              [
+                120.2118783,
+                30.2968998
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2118693,
+                30.2968998
+              ],
+              [
+                120.2114604,
+                30.2966433
+              ],
+              [
+                120.2113862,
+                30.2965912
+              ]
+            ]
+          }
+        ],
+        "status": "partial"
+      }
+    },
+    {
+      "id": "east-hall-1",
+      "from_station_id": "cn-hangzhou-east-railway-station-east-square",
+      "to_station_id": "cn-hangzhou-east-railway-station",
+      "label": "杭州东站跨站区步行",
+      "seconds": 541.0,
+      "distance_m": 676.0,
+      "bidirectional": false,
+      "source": "高德步行路径规划（站点参考位置）",
+      "source_url": "https://lbs.amap.com/api/webservice/guide/api/direction",
+      "connection_source": "https://www.hzsc.com.cn/content/content_9872452.html",
+      "note": "按高德站点参考位置步行方案计时、绘图；官方到达大厅换乘约7分钟。具体室内通道、安检和开放情况以现场为准。",
+      "verified_on": "2026-11-04",
+      "geometry": {
+        "crs": "wgs84",
+        "source": "高德路径规划 polyline",
+        "parts": [
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2113822,
+                30.2965912
+              ],
+              [
+                120.2114564,
+                30.2966383
+              ],
+              [
+                120.2118693,
+                30.2968998
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2118743,
+                30.2968998
+              ],
+              [
+                120.2123094,
+                30.2964354
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2123094,
+                30.2964314
+              ],
+              [
+                120.212144,
+                30.2963622
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.212139,
+                30.2963572
+              ],
+              [
+                120.2118694,
+                30.2962269
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2118654,
+                30.2962229
+              ],
+              [
+                120.2120739,
+                30.2959622
+              ],
+              [
+                120.2121571,
+                30.2958713
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.2121571,
+                30.2958673
+              ],
+              [
+                120.2116038,
+                30.2955536
+              ],
+              [
+                120.2111999,
+                30.2952761
+              ],
+              [
+                120.2110305,
+                30.2951759
+              ],
+              [
+                120.2108391,
+                30.2950667
+              ],
+              [
+                120.2106737,
+                30.2950494
+              ],
+              [
+                120.2104171,
+                30.2948881
+              ],
+              [
+                120.210365,
+                30.294845
+              ]
+            ]
+          },
+          {
+            "mode": "walk",
+            "label": "东站跨站区步行",
+            "coordinates": [
+              [
+                120.21036,
+                30.294841
+              ],
+              [
+                120.2103119,
+                30.294914
+              ],
+              [
+                120.2102598,
+                30.2948839
+              ],
+              [
+                120.2102036,
+                30.2948488
+              ],
+              [
+                120.2101605,
+                30.2948188
+              ],
+              [
+                120.2094639,
+                30.2943709
+              ],
+              [
+                120.2094248,
+                30.2943488
+              ],
+              [
+                120.2092986,
+                30.2942617
+              ],
+              [
+                120.2083413,
+                30.2936444
+              ],
+              [
+                120.2083934,
+                30.2935755
+              ]
+            ]
+          }
+        ],
+        "status": "complete"
+      }
+    }
+  ],
+  "school_groups": [
+    {
+      "id": "zju",
+      "name": "浙江大学",
+      "logo_file": "zju-transparent.png",
+      "color": "#225b8f",
+      "source": "https://www.zju.edu.cn/550/list.htm"
+    },
+    {
+      "id": "zjut",
+      "name": "浙江工业大学",
+      "logo_file": "zjut-transparent.png",
+      "color": "#296b75",
+      "source": "https://www.lib.zjut.edu.cn/xqdz/list.htm"
+    },
+    {
+      "id": "westlake",
+      "name": "西湖大学",
+      "logo_file": "westlake-transparent.png",
+      "color": "#ae7138",
+      "source": "https://zh-ugadmissions.westlake.edu.cn/WhyWestlake/WestlakeCampus/"
+    }
+  ],
+  "regional_network_file": "assets/regional-network.json",
+  "walking_snapshot_file": "assets/walking-snapshot.json"
+}

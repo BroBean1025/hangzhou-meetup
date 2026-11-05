@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<!-- Leaflet: see licenses/Leaflet-LICENSE.txt -->
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hangzhou MeetUp · 杭城同行</title>
+<link rel="stylesheet" href="/assets/vendor-leaflet.a78371028241.css"><link rel="stylesheet" href="/assets/commute-map.e18a6ab65a57.css"><link rel="stylesheet" href="/assets/destination-layout.d3601f5cbca9.css">
+</head>
+<body>
+<header><div class="brand"><div class="eyebrow">杭城同行</div><h1>Hangzhou MeetUp</h1></div><div class="tagline">从校园或地铁站出发，比较到达时间</div><button id="about">数据说明 ↗</button></header>
+<details class="campus-bar" id="origin-panel">
+ <summary class="origin-panel-summary"><span class="origin-panel-title">谁一起出发？<small id="origin-selected-count"></small></span><span id="origin-summary"></span><span id="origin-primary-summary"></span><span class="origin-panel-action" aria-hidden="true"></span></summary>
+ <div class="origin-panel-content"><div class="origin-panel-tools"><span>展开学校选择校区；各校区独立比较，可分别设置校门和接驳方式。</span><button id="add-origin">＋ 地铁站出发点</button></div><div id="campus-options"></div></div>
+</details>
+<section class="destination-bar" aria-label="设置目的地">
+ <label for="destination-search">这次去哪里？</label>
+ <div class="destination-picker">
+  <div class="destination-input-row"><input id="destination-search" type="search" placeholder="搜索目的地地铁站" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="destination-results" aria-autocomplete="list"><button id="destination-browse" aria-expanded="false" aria-controls="destination-results">按线路展开 ▾</button><button id="destination-clear" hidden aria-label="清除目的地和路线">清除</button></div>
+  <div id="destination-results" hidden aria-label="目的地站点列表"><div class="destination-results-heading"><span id="destination-results-title"></span><button id="destination-results-close" aria-label="关闭站点列表">×</button></div><div id="destination-choices"></div></div>
+ </div>
+ <span id="destination-selection" aria-live="polite">也可以直接点地图</span>
+</section>
+<main class="stage">
+ <div class="map-canvas">
+ <div id="map" aria-label="以玉泉校区为中心的杭州地铁到达时间地图"></div>
+ <aside class="paper-note"><h2>交通枢纽</h2><div id="primary-name"></div><div id="hub-list"></div><div class="sidebar-note">约数 · 到枢纽地铁站</div></aside>
+ <aside id="journey-key" hidden aria-label="各起点的路线图例"><div class="journey-key-heading"><strong id="journey-destination"></strong><button id="journey-all" aria-pressed="true">总览</button></div><p>颜色与编号代表起点 · 点击聚焦</p><div id="journey-list"></div><button id="meeting-entry" hidden aria-expanded="false" aria-controls="meeting-panel">◇ 途中汇合</button></aside>
+ <div class="controls" aria-label="地图视图"><button class="home" id="home">回到玉泉</button><button id="zoom-in" aria-label="放大地图">＋</button><button id="zoom-out" aria-label="缩小地图">−</button></div>
+ <div id="access-detail-bar" hidden><span id="access-detail-title"></span><button id="access-detail-back">返回全程</button></div>
+ <div class="compass" aria-hidden="true"><span>北</span><svg viewBox="0 0 30 58"><path d="M15 3 5 35 15 27 25 35Z" fill="#6d8273" opacity=".8"/><path d="M15 3 15 53M5 35 15 27 25 35" fill="none" stroke="#556c5d" stroke-width="1.4"/></svg></div>
+ <div id="labels"><svg id="label-lines" aria-hidden="true"></svg><div id="target-caption" class="destination-caption" hidden></div></div>
+ <div class="map-mode" id="mode"></div><div class="line-legend" id="legend" aria-label="地铁线路颜色"></div>
+ <div id="journey-guide" hidden>彩色：独立行程 · 深灰：共同路段<small>编号表示参与起点 · 浅灰为地铁网</small></div>
+ <div id="status" aria-live="polite">点击地图查询 · 静态规划估计 · 进出站及安检另计</div>
+ </div>
+ <aside id="comparison" hidden aria-label="各出发点到达时间"><button id="comparison-close" aria-label="关闭地点比较">×</button><h2 id="destination-title">到这里</h2><div id="comparison-summary" aria-live="polite"></div><details id="meeting-panel" hidden><summary>◇ 途中汇合<span id="meeting-count"></span></summary><div id="meeting-results"></div><p id="meeting-note"></p></details><div id="access-legend" hidden aria-label="接驳路线图例"></div><div id="comparison-results"></div><div class="comparison-note">整数分钟估算；非实时列车时间，进出站及安检另计。<span id="scope-note"></span></div></aside>
+</main>
+<dialog id="information"><button id="info-close">关闭</button><h2>数据与时间口径</h2><div id="notes"></div></dialog>
+<dialog id="station-picker"><button id="station-picker-close">关闭</button><h2>添加地铁站出发点</h2><p>可继续添加，不限数量。同一站无需重复添加；从站内起算。</p><input id="station-search" placeholder="搜索站名，例如 杭州东、龙翔桥" aria-label="搜索运营地铁站"><div id="station-results"></div></dialog>
+<dialog id="gate-picker"><button id="gate-picker-close">取消</button><h2 id="gate-picker-title">选择校门</h2><p>可以勾选多个校门，查询时在所选校门中择优；至少保留一个。</p><div id="gate-choices"></div><p class="gate-note">以已核实的校门参考点出发，不含校内步行；校门临时开放安排以学校为准。</p><button id="gate-apply">应用校门选择</button></dialog>
+<script id="dataset" type="application/json"></script><script id="geography" type="application/json"></script>
+<script src="/assets/map-data.77768c645afb.js"></script>
+<script src="/assets/vendor-leaflet.db49d009c841.js"></script><script src="/assets/map-icons.7d5514e4a34c.js"></script><script src="/assets/station-catalog.022bb2509b42.js"></script><script src="/assets/commute-map.3c289d177345.js"></script><script src="/assets/destination-picker.fb3dc977cfe8.js"></script>
+</body></html>
