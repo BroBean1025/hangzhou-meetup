@@ -2,9 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {stationDepartures} from '../../core/lib/route-timing.mjs';
 const data=JSON.parse(fs.readFileSync('core/data/map.json','utf8')),snapshot=JSON.stringify(data);
 const context=vm.createContext({});vm.runInContext(fs.readFileSync('core/src/rail-display.js','utf8'),context);
 const display=context.createRailDisplay(data),points=new Map(data.points.map(p=>[p.id,p]));
+test('separated transfer links preserve the provider time once, including downstream departures',()=>{
+ const id='cn-hangzhou-shanxian',p=points.get(id);
+ const result={legs:[{kind:'ride',line_id:'cn-hangzhou-line-3',seconds:120,station_ids:['before',id]},{kind:'transfer',from_station_id:id,to_station_id:id,seconds:193},{kind:'ride',line_id:'cn-hangzhou-line-5',seconds:180,station_ids:[id,'after']}]};
+ const original=JSON.stringify(result),links=display.transfers(result,16);assert.equal(links.length,1);assert.equal(links[0].seconds,193);
+ assert.equal(display.transfers(result,14).length,0);assert.equal(display.connections(p,14).length,0);assert.equal(display.connections(p,16).length,1);
+ assert.equal(stationDepartures(result.legs,60).find(s=>s.line_id==='cn-hangzhou-line-5').elapsed_seconds,373);
+ assert.equal(JSON.stringify(result),original);
+ const reversed={legs:[result.legs[2],result.legs[1],result.legs[0]]};assert.equal(JSON.stringify(display.transfers(reversed,16)[0].coordinates),JSON.stringify([...links[0].coordinates].reverse()));
+ const sameLine=structuredClone(result);sameLine.legs[2].line_id=sameLine.legs[0].line_id;assert.equal(display.transfers(sameLine,16).length,0);
+ const missing=structuredClone(result);missing.legs[1].seconds=null;assert.equal(display.transfers(missing,16)[0].seconds,null);
+});
 test('label collision catches crossings between distant vertices and leaves clear space',()=>{
  const box={x:20,y:20,w:60,h:18},cross=context.railCrossesLabel;
  assert.equal(cross({x:0,y:25},{x:120,y:25},box),true);

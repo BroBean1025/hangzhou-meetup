@@ -31,6 +31,7 @@ try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved){f
 let selected=null,requestSeq=0,requestController=null,clickedMarker=null,routeHighlight=null,lastQueryState='idle';
 let routeSelectionActive=false,routeFocus=null,usedRouteLines=new Set(),activeRouteEdges=new Map(),routeArrowCount=0,journeyBadgePositions=[];
 let accessLayer=null,accessDetail=null,accessLabels=[],accessPreviousView=null;
+let interchangeLayer=null,transferCaptions=[];
 const accessStyles={walk:{color:'#75654d',dashArray:'1 6',name:'步行'},bike:{color:'#277c68',dashArray:'8 5',name:'骑行'},bus:{color:'#a34c7a',dashArray:'11 5',name:'公交'},taxi:{color:'#5268b2',dashArray:'11 4 2 4',name:'打车'}};
 const map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:.25,zoomDelta:.75,minZoom:7,maxZoom:17,preferCanvas:true,fadeAnimation:false,zoomAnimation:false}).setView([D.origin.lat,D.origin.lon],11);
 map.attributionControl.setPrefix(false);map.attributionControl.addAttribution('地理 © <a href="https://www.openstreetmap.org/copyright">OSM</a> · 地铁 <a href="https://openmetro.dev">OpenMetro</a>');L.control.scale({imperial:false,maxWidth:90}).addTo(map);
@@ -158,6 +159,7 @@ function buildJourneyStrokes(edges){
  return strokes;
 }
 function renderRouteOverlay(){
+ renderTransferConnections();
  if(routeHighlight){map.removeLayer(routeHighlight);routeHighlight=null;}routeArrowCount=0;journeyBadgePositions=[];
  if(!routeSelectionActive||!activeRouteEdges.size){renderAccessRoutes();renderMeetingMarkers();return;}
  routeHighlight=L.layerGroup().addTo(map);const strokes=buildJourneyStrokes(activeRouteEdges);
@@ -181,6 +183,32 @@ function renderRouteOverlay(){
   }
  }
  renderJourneyBadges(strokes);renderAccessRoutes();renderMeetingMarkers();
+}
+function renderTransferConnections(){
+ interchangeLayer?.remove();interchangeLayer=null;for(const item of transferCaptions)item.el.remove();transferCaptions=[];
+ if(map.getZoom()<railDisplay.splitZoom)return;
+ interchangeLayer=L.layerGroup().addTo(map);
+ for(const p of D.points.filter(p=>p.is_interchange))for(const [a,b] of railDisplay.connections(p,map.getZoom())){
+  L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{pane:'rail',color:'#8b9688',weight:1.6,dashArray:'3 5',opacity:routeSelectionActive?.45:.8,interactive:false}).addTo(interchangeLayer);
+ }
+ const annotations=new Map();
+ for(const result of lastResults.filter(r=>routeSelectionActive&&!r.error&&!r.preview&&(!routeFocus||routeFocus===r.origin_id)))for(const t of railDisplay.transfers(result,map.getZoom())){
+  const color=routeIdentity(result.origin_id).color,coords=t.coordinates;
+  const time=t.seconds===null?'时间未取得':Math.floor(t.seconds/60)+'分'+Math.round(t.seconds%60)+'秒';
+  const note=points.get(t.station_id).name+' · '+lines.get(t.from_line).name+' → '+lines.get(t.to_line).name+' · 换乘步行约 '+time+(t.seconds===null?'':'（已计入总耗时）')+'；虚线为连接示意，非实际通道路径。';
+  L.polyline(coords,{pane:'route',color:'#fffaf0',weight:6,interactive:false}).addTo(interchangeLayer);
+  L.polyline(coords,{pane:'route',color,weight:3,dashArray:'5 6',interactive:false}).addTo(interchangeLayer);
+  L.polyline(coords,{pane:'routeHit',renderer:routeHitRenderer,weight:14,opacity:0,bubblingMouseEvents:false}).bindTooltip(esc(note)).addTo(interchangeLayer);
+  const key=t.station_id+'|'+[t.from_line,t.to_line].sort().join('|');if(!annotations.has(key))annotations.set(key,{t,notes:[]});annotations.get(key).notes.push(note);
+ }
+ for(const {t,notes} of annotations.values()){
+  const el=document.createElement('button');el.className='station-caption transfer-caption';el.type='button';
+  el.textContent=t.seconds===null?'换乘时间未取得':'换乘步行约 '+Math.floor(t.seconds/60)+'分'+Math.round(t.seconds%60)+'秒 · 已计入';el.title=notes.join('\n');
+  const lat=(t.coordinates[0][0]+t.coordinates[1][0])/2,lon=(t.coordinates[0][1]+t.coordinates[1][1])/2;
+  el.onclick=()=>L.popup().setLatLng([lat,lon]).setContent(notes.map(esc).join('<br>')).openOn(map);
+  $('labels').append(el);transferCaptions.push({lat,lon,el});
+ }
+ scheduleLabels();
 }
 function openSharedRoute(stroke,anchor){
  for(const group of [routeHighlight,accessLayer,meetingLayer])group?.eachLayer(layer=>layer.closeTooltip?.());
@@ -544,6 +572,7 @@ function updateLabels(){
   if(!chosen){el.hidden=true;return;}used.push(chosen);el.style.left=chosen.x+'px';el.style.top=chosen.y+'px';if(!detail)el.setAttribute('aria-pressed',String(selected===p.id));const ex=Math.max(chosen.x,Math.min(chosen.x+w,pos.x)),ey=Math.max(chosen.y,Math.min(chosen.y+h,pos.y));if(!detail&&Math.hypot(ex-pos.x,ey-pos.y)>12)connectors.push('<path d="M'+pos.x.toFixed(1)+' '+pos.y.toFixed(1)+'L'+ex.toFixed(1)+' '+ey.toFixed(1)+'" stroke="#8c9b88" stroke-width=".5" fill="none"/>');
  }
  for(const item of accessLabels)place(item,item.el,'access',12);
+ for(const item of transferCaptions)place(item,item.el,'transfer',12,true);
  const targetLabel=$('target-caption');targetLabel.hidden=!lastTarget||!!accessDetail;if(lastTarget&&!accessDetail){targetLabel.textContent='共同终点 · '+lastTarget.name;place({lat:lastTarget.latlng.lat,lon:lastTarget.latlng.lng},targetLabel,'destination',14);}
  for(const c of [...campuses].sort((a,b)=>Number(b.id===primary)-Number(a.id===primary))){const label=campusLabels.get(c.id);label.hidden=!enabled.has(c.id)||accessDetail?.id===c.id;if(label.hidden)continue;label.querySelector('.name').innerHTML=(routeSelectionActive?routeBadge(c.id):'')+esc(z<13?c.short_name:c.name);const routeGate=routeSelectionActive?lastResults.find(r=>r.origin_id===c.id&&completeRoute(r))?.gate_label:null;label.querySelector('.sub').textContent=(routeGate??(c.kind==='station'?(c.group_id?'两站区择优':'站内'):z>=gateZoom?(c.gate_options.find(g=>c.descriptor.gates.includes(g.key))?.label??c.gate_label)+' · 已选':c.gate_label))+(c.id===primary?' · 主':'');label.querySelector('.sub').hidden=z<11;place(c.displayOrigin??c,label,c.id,22);}
  const detailedResult=accessDetail&&lastResults.find(r=>r.origin_id===accessDetail.id),detailSegment=detailedResult&&accessSegments(detailedResult).find(s=>s.kind===accessDetail.kind),detailStation=detailSegment?.to_station_id??(accessDetail?.kind==='access'?detailedResult?.origin_station_id:accessDetail?.kind==='egress'?detailedResult?.destination_station_id:null);
@@ -568,6 +597,7 @@ new ResizeObserver(scheduleMapResize).observe($('map'));
 window.addEventListener('resize',scheduleMapResize);
 $('journey-all').onclick=()=>{leaveAccessDetail(true);routeFocus=null;syncRouteFocus();fitJourney();updateLabels();};
 for(const text of [
+ '放大后的分线站位用虚线表示站内换乘连接示意，并非实际通道路径。有路线时显示该次换乘的步行时间，已计入总耗时、途中汇合和出发时间安排，不会随缩放重复增加；同线途经不额外计入换乘。',
  '查询路线用起点编号与颜色区分，查询时底层地铁网统一灰显，官方线路颜色仅保留在卡片线路标签中；清除目的地后恢复彩色地铁网。共同路段合并成一条并标出参与起点编号；沿原始轨迹衔接，不生成额外的偏移轨道或人工连接。点击起点、路线、图例或结果卡可聚焦完整行程；点总览恢复全部。接驳沿用起点颜色，点线为步行，其他虚线为相应接驳方式。',
  '可添加任意数量的具体运营地铁站出发点；自定义站点从站内起算。学校可多选校门，并选择步行、公交、骑行或打车接驳。勾选出发点参与比较；主出发点只决定枢纽时间和回中位置。学校从所选校门出发，自定义地铁站从站内起算，方向均为出发点到目的地。'+campuses.map(c=>c.name+'：'+c.gate_label).join('；')+'。',
  '时间取整数分钟。站点和左侧枢纽时间包括校门至上车站步行、地铁乘车及换乘；终点是地铁站。任意地图选点另加下车后至选点的高德步行。3公里内也比较直接步行。',

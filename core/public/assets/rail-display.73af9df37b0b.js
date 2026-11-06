@@ -14,7 +14,22 @@ function createRailDisplay(data){
   const total=length.at(-1),reach=Math.min(400,total/2)||1;
   return source.map((c,i)=>{const start=Math.max(0,1-length[i]/reach),end=Math.max(0,1-(total-length[i])/reach);return [c[1]+start*(a.lat-source[0][1])+end*(b.lat-source.at(-1)[1]),c[0]+start*(a.lon-source[0][0])+end*(b.lon-source.at(-1)[0])];});
  }
- return {splitZoom,nodes,coordinates};
+ function connections(p,zoom){
+  const all=nodes(p,zoom),used=new Set([0]),links=[];
+  while(used.size<all.length){let best;for(const a of used)for(let b=0;b<all.length;b++)if(!used.has(b)){const d=distance([all[a].lon,all[a].lat],[all[b].lon,all[b].lat]);if(!best||d<best.distance)best={a,b,distance:d};}links.push([all[best.a],all[best.b]]);used.add(best.b);}return links;
+ }
+ function transfers(result,zoom){
+  if(zoom<splitZoom)return [];
+  const out=[],legs=result.legs??[];
+  for(let i=0;i<legs.length;i++){
+   const leg=legs[i],before=legs[i-1],after=legs[i+1];
+   if(leg.kind!=='transfer'||before?.kind!=='ride'||after?.kind!=='ride'||before.line_id===after.line_id||leg.from_station_id!==leg.to_station_id)continue;
+   const id=leg.from_station_id,a=positions.get(id+'|'+before.line_id),b=positions.get(id+'|'+after.line_id);
+   if(!a||!b||distance(a,b)<12)continue;
+   out.push({station_id:id,from_line:before.line_id,to_line:after.line_id,seconds:Number.isFinite(leg.seconds)&&leg.seconds>=0?leg.seconds:null,coordinates:[[a[1],a[0]],[b[1],b[0]]]});
+  }return out;
+ }
+ return {splitZoom,nodes,coordinates,connections,transfers};
 }
 
 // Exact segment/rectangle intersection, including lines crossing between vertices.
