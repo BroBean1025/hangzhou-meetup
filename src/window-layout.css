@@ -1,0 +1,80 @@
+/* Viewport-sized desktop layout, with a natural scrolling layout on narrow windows. */
+html{height:100%;scrollbar-gutter:auto}
+body{min-width:320px;height:100dvh}
+header{gap:18px}
+header .brand{min-width:0}
+#desktop-settings{flex:none;border:1px solid #b8c2ad;border-radius:4px;background:#edf1e5;padding:7px 11px;font-size:12px}
+#desktop-updates{flex:none;border:1px solid #b8c2ad;border-radius:4px;background:#edf1e5;padding:7px 11px;font-size:12px}
+#desktop-updates.has-update{background:#dcebd5;border-color:#6c8e62;font-weight:600}
+#desktop-update-dialog{max-width:560px}
+#desktop-update-dialog .update-version{font-weight:600;font-size:14px}
+#desktop-update-dialog .update-checked{font-size:11px;color:var(--muted)}
+#update-message{min-height:34px;color:#4d7154;line-height:1.7}
+#update-message.update-error{color:#a25735}
+#update-progress{width:100%;height:10px;accent-color:#587760}
+#update-notes{margin:14px 0;border:1px solid var(--line);padding:10px;border-radius:4px}
+#update-notes summary{font-size:12px;cursor:pointer}
+#update-notes pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.8 var(--sans);max-height:24dvh;overflow:auto}
+.update-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.update-actions button{float:none;min-height:36px;background:#edf1e5;font-size:12px}
+.update-actions button:disabled{opacity:.6;cursor:wait}
+#update-release-page{background:transparent}
+#desktop-settings-dialog label{display:block;font-size:13px;margin:14px 0 8px}
+#desktop-key{width:100%;min-width:0;background:#fffdf5;border:1px solid #b8c2ad;padding:10px;border-radius:4px;font:14px var(--sans)}
+#desktop-save-key{float:none;background:#e3ecd9;min-height:38px}
+#desktop-settings-message{color:#55754d;min-height:20px}
+.desktop-shortcuts{border-top:1px solid var(--line);padding-top:12px}
+dialog{max-height:calc(100dvh - 32px)}
+.map-canvas{container-type:size}
+@container (max-height:350px){
+  #journey-key{top:10px;max-height:calc(100% - 20px);overflow:auto}
+  #journey-key p{display:none}
+  #journey-list{max-height:84px}
+  #journey-guide{display:none}
+}
+@media(min-width:1001px){
+  body{overflow-y:auto}
+  .stage,.stage:has(#comparison:not([hidden])),.campus-bar[open]~.stage,.time-planner[open]~.stage{height:auto;min-height:220px;flex:1 1 0;grid-template-rows:minmax(0,1fr)}
+  .stage:has(#comparison:not([hidden])){grid-template-columns:minmax(0,1fr) clamp(300px,28vw,390px)}
+  #comparison{max-height:none}
+  .origin-panel-content{max-height:min(30dvh,300px)}
+  .time-planner[open]{max-height:32dvh;overflow:auto}
+}
+@media(min-width:1001px) and (max-height:760px){
+  header{height:62px;padding:9px 20px}
+  header .tagline{display:none}
+  .origin-panel-summary{min-height:45px;padding:7px 0}
+  .destination-bar{padding-top:7px;padding-bottom:7px}
+  .time-planner>summary{padding:6px 0}
+  .origin-panel-content{max-height:22dvh}
+  .time-planner[open]{max-height:25dvh}
+  .campus-bar:has(~.time-planner[open]) .origin-panel-content{max-height:17dvh}
+  .paper-note{max-height:calc(100% - 72px);overflow:auto}
+  #journey-key{max-height:calc(100% - 78px);overflow:auto}
+  #journey-list{max-height:100px}
+}
+@media(max-width:1000px){
+  body{height:auto;min-height:100dvh;overflow-y:auto}
+  header{padding:12px 18px}
+  .stage,.stage:has(#comparison:not([hidden])),.campus-bar[open]~.stage,.campus-bar[open]~.stage:has(#comparison:not([hidden])),.time-planner[open]~.stage,.time-planner[open]~.stage:has(#comparison:not([hidden])){height:auto;flex:none;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:clamp(320px,calc(100dvh - 255px),660px) auto}
+  #comparison{max-height:none;overflow:visible;border-left:0;border-top:1px solid var(--line)}
+  .origin-panel-content{max-height:38dvh}
+  #destination-selection{padding-left:0}
+}
+@media(max-width:650px){
+  header{padding:10px 12px;gap:7px}
+  header .brand{flex:1 1 auto}
+  header .brand h1{font-size:clamp(16px,4.4vw,21px)}
+  header #about{order:2;font-size:10px;white-space:nowrap}
+  #desktop-settings{order:2;font-size:10px;padding:5px 7px}
+  #desktop-updates{order:2;font-size:10px;padding:5px 7px}
+  .current-clock{order:3;flex-basis:100%}
+  #origin-primary-summary{max-width:105px}
+  .stage,.stage:has(#comparison:not([hidden])),.campus-bar[open]~.stage,.campus-bar[open]~.stage:has(#comparison:not([hidden])),.time-planner[open]~.stage,.time-planner[open]~.stage:has(#comparison:not([hidden])){grid-template-rows:clamp(340px,calc(100dvh - 300px),580px) auto}
+  #comparison{padding:16px 13px}
+  #gate-choices{grid-template-columns:minmax(0,1fr)}
+  .origin-panel-title{font-size:14px}
+  .origin-panel-title small{margin-left:5px}
+  #journey-key{max-height:calc(100% - 110px);overflow:auto}
+  #journey-list{max-height:110px}
+}

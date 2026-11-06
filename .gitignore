@@ -24,6 +24,8 @@ Thumbs.db
 dist/
 coverage/
 releases/
+desktop-output/
+test-artifacts/
 *.zip
 *.tar.gz
 *.tgz

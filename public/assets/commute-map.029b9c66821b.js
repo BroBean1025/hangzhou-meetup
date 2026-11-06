@@ -534,8 +534,9 @@ function updateLabels(){
  for(const {g,el,visible} of gateDetails){if(visible)place(g,el,'gate:'+g.key,6,true);}
  $('label-lines').innerHTML=connectors.join('');
 }
-let labelFrame;map.on('move zoom resize',()=>{cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(updateLabels)});map.on('zoomend',renderRails);map.on('moveend',renderRouteOverlay);
-const overlayObserver=new ResizeObserver(()=>{cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(updateLabels)});for(const el of document.querySelectorAll('.paper-note,.controls,.line-legend,#status'))overlayObserver.observe(el);
+let labelFrame;function scheduleLabels(){clearTimeout(labelFrame);labelFrame=setTimeout(updateLabels,16);}
+map.on('move zoom resize',scheduleLabels);map.on('zoomend',renderRails);map.on('moveend',renderRouteOverlay);
+const overlayObserver=new ResizeObserver(scheduleLabels);for(const el of document.querySelectorAll('.paper-note,.controls,.line-legend,#status'))overlayObserver.observe(el);
 function resizeMapPreservingView(){
  map.closePopup();
  const center=map.getCenter(),zoom=map.getZoom();
@@ -543,7 +544,10 @@ function resizeMapPreservingView(){
  map.invalidateSize({pan:true,animate:false});map.setView(center,zoom,{animate:false});
  updateLabels();renderRails();
 }
-let resizePending;new ResizeObserver(()=>{cancelAnimationFrame(resizePending);resizePending=requestAnimationFrame(resizeMapPreservingView)}).observe($('map'));
+// A timer also runs while a desktop window is hidden or between Chromium zoom frames.
+let resizePending;function scheduleMapResize(){clearTimeout(resizePending);resizePending=setTimeout(resizeMapPreservingView,50);}
+new ResizeObserver(scheduleMapResize).observe($('map'));
+window.addEventListener('resize',scheduleMapResize);
 $('journey-all').onclick=()=>{leaveAccessDetail(true);routeFocus=null;syncRouteFocus();fitJourney();updateLabels();};
 for(const text of [
  '查询路线用起点编号与颜色区分，查询时底层地铁网统一灰显，官方线路颜色仅保留在卡片线路标签中；清除目的地后恢复彩色地铁网。共同路段合并成一条并标出参与起点编号；沿原始轨迹衔接，不生成额外的偏移轨道或人工连接。点击起点、路线、图例或结果卡可聚焦完整行程；点总览恢复全部。接驳沿用起点颜色，点线为步行，其他虚线为相应接驳方式。',
