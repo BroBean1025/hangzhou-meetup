@@ -15,7 +15,7 @@ try{
  await page.waitForSelector('.route-preferences');await page.waitForSelector('.leaflet-pane',{state:'attached'});
  await page.route('**/api/query',async route=>{
   const body=route.request().postDataJSON();requests.push(body);
-  const fixture=fixtures.find(f=>f.request.origin.station_id===body.origin.station_id&&f.request.station_ids.join('|')===body.station_ids?.join('|')&&f.request.preferences.strategy===body.preferences?.strategy&&f.request.preferences.east_station===body.preferences?.east_station);
+  const fixture=fixtures.find(f=>f.request.origin.kind===body.origin.kind&&f.request.origin.id===body.origin.id&&f.request.origin.station_id===body.origin.station_id&&f.request.station_ids.join('|')===body.station_ids?.join('|')&&f.request.preferences.strategy===body.preferences?.strategy&&f.request.preferences.east_station===body.preferences?.east_station);
   return route.fulfill({status:fixture?200:500,contentType:'application/json',body:JSON.stringify(fixture?.response??{error:'Missing test fixture'})});
  });
  await page.evaluate(()=>{
@@ -62,8 +62,15 @@ try{
  await page.locator('[data-strategy="transfers"]').click();await done();
  assert.equal(await page.evaluate(()=>lastResults[0].transfers),2);
  assert.equal(await page.evaluate(()=>lastResults[0].total_seconds),4761);
- assert.match(await page.locator('.route-metric.fare').textContent(),/待确认/);
+ assert.match(await page.locator('.route-metric.fare').textContent(),/票价约 10 元/);
  await page.screenshot({path:path.join(out,'preferences-fewer-transfers.png'),fullPage:true});
+ await page.evaluate(()=>{lastTarget=null;enabled.clear();enabled.add('yuquan');primary='yuquan';const c=byCampus.get('yuquan');c.descriptor={kind:'campus',id:'yuquan',gates:['north'],mode:'walk'};c.ready=true;refreshCampuses(false);});
+ await page.locator('#destination-search').fill('杭州东');await page.locator('.destination-station').first().click();await done();
+ assert.equal(await page.evaluate(()=>lastResults[0].origin_station_id),'cn-hangzhou-gudang');
+ assert.ok(await page.evaluate(()=>lastResults[0].alternatives.every(r=>r.access_seconds<600)));
+ assert.match(await page.locator('.route-metric.fare').textContent(),/票价约 4 元/);
+ await page.locator('#east-preference').check();await done();
+ await page.screenshot({path:path.join(out,'practical-yuquan.png'),fullPage:true});
  await page.reload();await page.waitForSelector('.route-preferences');
  assert.equal(await page.locator('[data-strategy="transfers"]').getAttribute('aria-pressed'),'true');
  assert.deepEqual(errors,[]);report={passed:true,layouts,requests:requests.length,manualChoiceUpdatesMapAndDeparture:true,errors};

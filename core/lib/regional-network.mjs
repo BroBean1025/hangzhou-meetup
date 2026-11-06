@@ -1,4 +1,5 @@
 // Primary rail weights come from OpenMetro; regional estimates are frozen inputs.
+import {MinHeap} from './min-heap.mjs';
 export function mergeCatalog(stations,lines,regional){
  const byId=new Map(stations.map(s=>[s.id,{...s}]));
  for(const e of regional.stations??[]){const s=byId.get(e.id);if(s){s.lines=[...new Set([...(s.lines??[]),...e.lines])];s.is_interchange=s.lines.length>1;}else byId.set(e.id,e);}
@@ -15,14 +16,18 @@ export class RegionalRouter{
  paths(origin,strategy='time'){
   const cacheKey=origin+'|'+strategy;
   if(this.memo.has(cacheKey))return this.memo.get(cacheKey);
-  // Small graph (<500 platform states); O(V²+E) avoids a new heap dependency.
-  const distance=new Map(this.at.get(origin).map(n=>[n,0])),changes=new Map(this.at.get(origin).map(n=>[n,0])),previous=new Map(),pending=new Set(this.nodes.keys());
+  if(!this.at.has(origin))throw Error('Unknown origin station');
+  const distance=new Map(this.at.get(origin).map(n=>[n,0])),changes=new Map(this.at.get(origin).map(n=>[n,0])),previous=new Map(),settled=new Set();
   const better=(t,c,oldT,oldC)=>strategy==='transfers'?(c<oldC||c===oldC&&t<oldT):t<oldT;
-  while(pending.size){let node=null,cost=Infinity,count=Infinity;for(const n of pending){const d=distance.get(n)??Infinity,c=changes.get(n)??Infinity;if(better(d,c,cost,count)){node=n;cost=d;count=c;}}if(node===null)break;pending.delete(node);
-   for(const e of this.adj.get(node)){const next=cost+e.seconds,c=count+(e.kind==='transfer'&&!e.same_line_direction_change?1:0);if(pending.has(e.to)&&better(next,c,distance.get(e.to)??Infinity,changes.get(e.to)??Infinity)){distance.set(e.to,next);changes.set(e.to,c);previous.set(e.to,e);}}
+  const rank=new Map([...this.nodes.keys()].map((n,i)=>[n,i]));
+  const heap=new MinHeap((a,b)=>better(a.cost,a.count,b.cost,b.count)||!better(b.cost,b.count,a.cost,a.count)&&rank.get(a.node)<rank.get(b.node));
+  for(const node of this.at.get(origin))heap.push({node,cost:0,count:0});
+  // One O((V+E) log V) traversal serves every destination for this origin.
+  while(heap.size){const {node,cost,count}=heap.pop();if(settled.has(node)||distance.get(node)!==cost||changes.get(node)!==count)continue;settled.add(node);
+   for(const e of this.adj.get(node)){const next=cost+e.seconds,c=count+(e.kind==='transfer'&&!e.same_line_direction_change?1:0);if(!settled.has(e.to)&&better(next,c,distance.get(e.to)??Infinity,changes.get(e.to)??Infinity)){distance.set(e.to,next);changes.set(e.to,c);previous.set(e.to,e);heap.push({node:e.to,cost:next,count:c});}}
   }
   const best=new Map();for(const [sid,ns]of this.at){const available=ns.filter(n=>distance.has(n));if(available.length)best.set(sid,available.reduce((a,b)=>better(distance.get(b),changes.get(b),distance.get(a),changes.get(a))?b:a));}
-  const value={distance,previous,best};this.memo.set(cacheKey,value);return value;
+  const value={distance,previous,best};if(this.memo.size>=128)this.memo.delete(this.memo.keys().next().value);this.memo.set(cacheKey,value);return value;
  }
  times(origin,within=10800){const {distance,best}=this.paths(origin);return [...best].filter(([,n])=>distance.get(n)<=within).map(([station_id,n])=>({station_id,seconds:distance.get(n)}));}
  timedLeg(leg){

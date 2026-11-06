@@ -6,8 +6,10 @@ import walkingSnapshot from '../config/walking-snapshot.json' with { type: 'json
 import {mergeCatalog,RegionalRouter} from './regional-network.mjs';
 import {stationDepartures} from './route-timing.mjs';
 import {queryPreferred} from './route-preferences.mjs';
+import railSnapshot from '../config/rail-snapshot.json' with {type:'json'};
+import {quoteFare} from './fares.mjs';
+import {practicalAccess} from './routing-policy.mjs';
 
-const API = 'https://openmetro.dev/api/networks/cn-hangzhou';
 const LABEL = {walk:'步行',bus:'公交',bike:'骑行',taxi:'打车'};
 const TTL = {walk:604800,bus:900,bike:86400,taxi:300,station:86400};
 export class QueryError extends Error {}
@@ -124,9 +126,8 @@ async function requestJson(base,params,ttl,version=''){
 export class MetroService {
   constructor(key){this.key=key;this.connectorConfig=config.station_connectors??[];}
   async init(){
-    const network=await requestJson(API,{},86400);if(network.coordinate_system!=='gcj02')throw new QueryError('地铁坐标基准需要重新核验。');
+    const {network,stations,lines}=railSnapshot;if(network.coordinate_system!=='gcj02')throw new QueryError('地铁坐标基准需要重新核验。');
     this.network=network;this.version=network.synced_at;
-    const [stations,lines]=await Promise.all(['stations','lines'].map(name=>requestJson(API+'/'+name,{},86400,this.version)));
     if(!Array.isArray(stations)||!Array.isArray(lines))throw new QueryError('地铁目录数据异常。');
     const merged=mergeCatalog(stations,lines,regional);
     this.stations=new Map(merged.stations.filter(s=>s.status==='operating'&&s.location).map(s=>[s.id,s]));
@@ -134,7 +135,7 @@ export class MetroService {
   }
   async railRouter(){
     if(railMemo?.version===this.version)return railMemo.router;
-    const [graph,segments]=await Promise.all([requestJson(API+'/graph',{},86400,this.version),requestJson(API+'/segments',{},86400,this.version)]);
+    const {graph,segments}=railSnapshot;
     if(graph.weight!=='seconds'||!Array.isArray(graph.nodes)||!Array.isArray(graph.edges))throw new QueryError('OpenMetro 网络图数据需要重新核验。');
     const router=new RegionalRouter(graph,regional,this.stations,segments);railMemo={version:this.version,router};return router;
   }
@@ -171,11 +172,12 @@ export class MetroService {
     return parseAccess(mode,await requestJson(path,params,TTL[mode]));
   }
   async engine(d,gate){
-    return cached('engine-v3|'+this.version+'|'+JSON.stringify(this.connectorConfig)+'|'+gate+'|'+d.mode,Math.min(TTL[d.mode],86400),async()=>{
+    return cached('engine-v4|'+this.version+'|'+JSON.stringify(this.connectorConfig)+'|'+gate+'|'+d.mode,Math.min(TTL[d.mode],86400),async()=>{
       const start=d.kind==='station'?this.stations.get(gate):config.origins[gate];
-      const options=d.kind==='station'?[{station:start,walk:{mode:'station',seconds:0,distance_m:0,source:'指定地铁站内起算',notes:[]}}]:await this.nearest(start.location,5,start.max_station_distance_km??2.5);
+      let options=d.kind==='station'?[{station:start,walk:{mode:'station',seconds:0,distance_m:0,source:'指定地铁站内起算',notes:[]}}]:await this.nearest(start.location,5,start.max_station_distance_km??2.5);
       const errors=[];
       if(d.kind!=='station')await Promise.all(options.map(async o=>{try{o.walk=await this.access(d.mode,start.location,o.station.location,start.city??'杭州');}catch(e){errors.push(e.message);o.walk={seconds:null,reason:e.message};}}));
+      options=practicalAccess(options,d.mode);
       const reached={};
       for(const o of options){
         if(o.walk.seconds===null)continue;
@@ -208,11 +210,7 @@ export class MetroService {
   }
   async rawRoute(from,to){
     if(from===to)return {total_seconds:0,legs:[],transfers:0,fare:0};
-    if(from.startsWith('regional-')||to.startsWith('regional-'))return (await this.railRouter()).route(from,to);
-    const p=await requestJson(API+'/route',{from,to,weight:'time'},86400,this.version);
-    if(p.from_station_id!==from||p.to_station_id!==to||!Array.isArray(p.legs)||Math.abs(p.legs.reduce((n,l)=>n+sec(l.seconds),0)-sec(p.total_seconds))>.01||p.legs.some(l=>!['ride','transfer'].includes(l.kind)))throw new QueryError('地铁路线的端点或时间拆分异常。');
-    if(p.legs.some(l=>(l.station_ids||[l.from_station_id,l.to_station_id]).some(id=>!this.stations.has(id))))throw new QueryError('路线包含未运营或未知站点。');
-    return p;
+    const plan=(await this.railRouter()).route(from,to);return {...plan,...quoteFare(plan,from,to)};
   }
   async route(from,to){
     if(from===to)return this.rawRoute(from,to);
@@ -231,7 +229,7 @@ export class MetroService {
     const router=await this.railRouter();
     const legs=plan.legs.map(l=>({...router.timedLeg(l),line_name:this.lines.get(l.line_id),station_names:(l.station_ids||[l.from_station_id,l.to_station_id]).map(id=>this.stations.get(id).name)}));
     const station_departures=stationDepartures(legs,base.access_seconds);
-    return {station_departures,mode:'metro',total_seconds:base.seconds+egress.seconds,access_seconds:base.access_seconds,ride_seconds:legs.filter(l=>l.kind==='ride').reduce((n,l)=>n+sec(l.seconds),0),transfer_seconds:legs.filter(l=>['transfer','walk_transfer'].includes(l.kind)).reduce((n,l)=>n+sec(l.seconds),0),cross_station_seconds:legs.filter(l=>l.kind==='walk_transfer').reduce((n,l)=>n+sec(l.seconds),0),egress_seconds:egress.seconds,origin_station:origin.station.name,destination_station:end.name,origin_station_id:origin.station.id,destination_station_id:end.id,egress,access_mode:origin.walk.mode,access_details:origin.walk,line_names:legs.filter(l=>l.kind==='ride').map(l=>l.line_name),legs,transfers:plan.transfers,fare:plan.fare,warnings:['在指定候选上车站、目的地附近候选站中择优。',...(plan.warnings??[]),...(errors.length?['部分候选未取得完整路线，仅比较成功结果。']:[])]};
+    return {station_departures,mode:'metro',total_seconds:base.seconds+egress.seconds,access_seconds:base.access_seconds,ride_seconds:legs.filter(l=>l.kind==='ride').reduce((n,l)=>n+sec(l.seconds),0),transfer_seconds:legs.filter(l=>['transfer','walk_transfer'].includes(l.kind)).reduce((n,l)=>n+sec(l.seconds),0),cross_station_seconds:legs.filter(l=>l.kind==='walk_transfer').reduce((n,l)=>n+sec(l.seconds),0),egress_seconds:egress.seconds,origin_station:origin.station.name,destination_station:end.name,origin_station_id:origin.station.id,destination_station_id:end.id,egress,access_mode:origin.walk.mode,access_details:origin.walk,line_names:legs.filter(l=>l.kind==='ride').map(l=>l.line_name),legs,transfers:plan.transfers,...quoteFare(plan,origin.station.id,end.id),warnings:['在指定候选上车站、目的地附近候选站中择优。',...(plan.warnings??[]),...(errors.length?['部分候选未取得完整路线，仅比较成功结果。']:[])]};
   }
   async queryGate(d,gate,payload){
     const engine=await this.engine(d,gate);let result,dest,lon,lat,sid;

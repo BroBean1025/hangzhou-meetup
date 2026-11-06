@@ -42,11 +42,15 @@ async function reloadVerified(){
   const failedResource=details=>{if(details.level==='error')failed=true;};
   wc.on('console-message',failedResource);
   try{
-    await wc.loadURL(origin);
+    try{await wc.loadURL(origin);}catch(error){
+      // Preload can restore saved preferences and reload this same document
+      // before loadURL resolves. Verify the replacement load instead of exiting.
+      if(error.code!=='ERR_ABORTED'||wc.isDestroyed()||wc.getURL()!==origin+'/')throw error;
+    }
     const deadline=Date.now()+15000;
     while(Date.now()<deadline){
       if(failed)throw Error('UI initialization error');
-      try{if(await wc.executeJavaScript("!!document.querySelector('.leaflet-pane') && !!document.querySelector('#desktop-updates') && typeof map !== 'undefined' && map.getSize().x > 0"))return;}catch{}
+      try{if(!wc.isLoadingMainFrame()&&await wc.executeJavaScript("!!document.querySelector('.leaflet-pane') && !!document.querySelector('#desktop-updates') && typeof map !== 'undefined' && map.getSize().x > 0"))return;}catch{}
       await new Promise(resolve=>setTimeout(resolve,100));
     }
     throw Error('UI initialization timeout');
@@ -140,7 +144,7 @@ else{
       {label:'应用',submenu:[{label:'高德服务设置…',click:settingsDialog},{type:'separator'},{label:'退出',role:'quit'}]},
       {label:'编辑',submenu:[{label:'撤销',role:'undo'},{label:'重做',role:'redo'},{type:'separator'},{label:'剪切',role:'cut'},{label:'复制',role:'copy'},{label:'粘贴',role:'paste'},{label:'全选',role:'selectAll'}]},
       {label:'视图',submenu:[{label:'刷新地图',role:'reload'},{type:'separator'},{label:'放大界面',role:'zoomIn'},{label:'缩小界面',role:'zoomOut'},{label:'恢复默认大小',role:'resetZoom'},{type:'separator'},{label:'全屏',role:'togglefullscreen'}]},
-      {label:'帮助',submenu:[{label:'检查更新…',click:()=>{updateDialog();updates.check({manual:true}).catch(()=>{});}},{label:'恢复随程序安装的界面',click:()=>updates.resetHot()},{label:'GitHub 发布页面',click:()=>openExternal(RELEASES_URL)},{type:'separator'},{label:'关于杭城同行',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'杭城同行',message:'杭城同行 · Hangzhou MeetUp',detail:`客户端版本 ${app.getVersion()} · 界面 ${hot.currentVersion}\n地图资源在本机；路线与接驳查询需要联网。\n每天首次打开时自动检查 GitHub 更新。\nCtrl + / − 调整界面大小，Ctrl + 0 恢复，F11 全屏。\n按 Alt 显示菜单。`})}]}
+      {label:'帮助',submenu:[{label:'检查更新…',click:()=>{updateDialog();updates.check({manual:true}).catch(()=>{});}},{label:'恢复随程序安装的界面',click:()=>updates.resetHot()},{label:'GitHub 发布页面',click:()=>openExternal(RELEASES_URL)},{type:'separator'},{label:'关于杭城同行',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'杭城同行',message:'杭城同行 · Hangzhou MeetUp',detail:`客户端版本 ${app.getVersion()} · 界面 ${hot.currentVersion}\n地铁站间路线与票价在本机计算；接驳查询按需联网。\n每天首次打开时自动检查 GitHub 更新。\nCtrl + / − 调整界面大小，Ctrl + 0 恢复，F11 全屏。\n按 Alt 显示菜单。`})}]}
     ]));
     await createWindow();
     if(updates.version!==hot.currentVersion){updates.version=hot.currentVersion;updates.set({currentVersion:hot.currentVersion,phase:'idle',availableVersion:null,message:'上次界面补丁未正常启动，已恢复内置界面。'});}

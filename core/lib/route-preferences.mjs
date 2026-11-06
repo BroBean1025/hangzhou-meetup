@@ -1,4 +1,5 @@
 import {directedConnectors,connectPlans} from './walk-connectors.mjs';
+import {practicalTransferChoices} from './routing-policy.mjs';
 export const EAST_MAIN='cn-hangzhou-east-railway-station',EAST_SQUARE=EAST_MAIN+'-east-square';
 export const byTime=(a,b)=>a.total_seconds-b.total_seconds||(a.transfers??0)-(b.transfers??0);
 export const byTransfers=(a,b)=>(a.transfers??0)-(b.transfers??0)||byTime(a,b);
@@ -12,7 +13,7 @@ export function selectPreferred(candidates,preferences){
  // Walking from East Square to the main area does not avoid the long station approach.
  const main=candidates.filter(r=>r.destination_station_id===EAST_MAIN&&r.legs?.at(-1)?.kind!=='walk_transfer'&&r.total_seconds<=fastest.total_seconds+600);
  const apply=preferences.east_station==='main_within_10'&&east&&main.length>0,pool=apply?main:candidates;
- const time=[...pool].sort(byTime)[0],transfers=[...pool].sort(byTransfers)[0];
+ const time=[...pool].sort(byTime)[0],transfers=practicalTransferChoices(pool,time).sort(byTransfers)[0];
  const picks=[['time','时间优先',time],['transfers','少换乘',transfers]];
  if(east&&!apply&&main.length)picks.push(['east_main','杭州东 · 1/4站区',[...main].sort(byTime)[0]]);
  if(apply&&fastest!==time)picks.push(['absolute_fastest','最快到站',fastest]);
@@ -20,7 +21,8 @@ export function selectPreferred(candidates,preferences){
  const alternatives=[];
  for(const [key,label,route] of picks){const prior=alternatives.find(a=>signature(a)===signature(route));if(prior){prior.tags.push(label);continue;}alternatives.push({...route,choice_id:key,tags:[label],extra_seconds:route.total_seconds-fastest.total_seconds});}
  const chosen=preferences.strategy==='transfers'?transfers:time,selected=alternatives.find(r=>signature(r)===signature(chosen));
- const note=!east?null:apply?'已优先杭州东1/4号线站区；比最快到站方案多 '+Math.ceil((selected.total_seconds-fastest.total_seconds)/60)+' 分钟。':preferences.east_station==='main_within_10'?'1/4号线站区暂无多花10分钟以内的可用方案，保留当前路线。':'可开启杭州东进站偏好，在多花10分钟以内优先1/4号线站区。';
+ const extra=Math.ceil((selected.total_seconds-fastest.total_seconds)/60);
+ const note=!east?null:apply?'已优先杭州东1/4号线站区；'+(extra>0?'比最快方案多 '+extra+' 分钟。':'无需增加行程时间。'):preferences.east_station==='main_within_10'?'1/4号线站区暂无多花10分钟以内的可用方案，保留当前路线。':'可开启杭州东进站偏好，在多花10分钟以内优先1/4号线站区。';
  return {...selected,alternatives,preference_note:note,preferences};
 }
 export async function fewestPlan(service,from,to){
