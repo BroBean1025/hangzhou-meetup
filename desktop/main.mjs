@@ -1,5 +1,6 @@
 import {app,BrowserWindow,Menu,ipcMain,dialog,shell,screen,session,net} from 'electron';
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
+import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createMapServer} from '../core/server.mjs';
@@ -19,7 +20,11 @@ const runtimeEnv={};
 let writeQueue=Promise.resolve();
 function saveSettings(){
   const content=JSON.stringify(settings,null,2);
-  writeQueue=writeQueue.catch(()=>{}).then(async()=>{await mkdir(profile,{recursive:true});await writeFile(settingsPath,content,'utf8');});
+  writeQueue=writeQueue.catch(()=>{}).then(async()=>{
+    await mkdir(profile,{recursive:true});
+    const temporary=settingsPath+'.'+randomUUID()+'.tmp';
+    await writeFile(temporary,content,{encoding:'utf8',flush:true});await rename(temporary,settingsPath);
+  });
   return writeQueue;
 }
 function trusted(event){return event.sender===mainWindow?.webContents&&event.senderFrame===mainWindow.webContents.mainFrame&&new URL(event.senderFrame.url).origin===origin;}
@@ -79,7 +84,10 @@ else{
   app.on('second-instance',()=>{if(mainWindow){if(mainWindow.isMinimized())mainWindow.restore();mainWindow.show();mainWindow.focus();dailyUpdateCheck();}});
   app.whenReady().then(async()=>{
     await mkdir(profile,{recursive:true});
-    try{settings=JSON.parse(await readFile(settingsPath,'utf8'));}catch{}
+    try{
+      settings=JSON.parse(await readFile(settingsPath,'utf8'));
+      if(!settings||typeof settings!=='object'||Array.isArray(settings))throw Error('Invalid settings');
+    }catch(error){if(error.code!=='ENOENT')throw Error('无法读取本地设置。原文件已保留，请检查用户目录中的 settings.json 后重试。');}
     if(!app.isPackaged){try{process.loadEnvFile(path.join(here,'../.env'));}catch{}}
     runtimeEnv.AMAP_WEB_SERVICE_KEY=configuredKey(settings.amapKey)||configuredKey(process.env.AMAP_WEB_SERVICE_KEY);
     let runtime;try{runtime=JSON.parse(await readFile(path.join(here,'runtime.json'),'utf8'));}catch{}

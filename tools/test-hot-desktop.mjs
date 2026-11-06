@@ -23,7 +23,7 @@ const parts=runtime.version.split('.').map(Number),next=n=>`${parts[0]}.${parts[
 const env={...process.env,MEETUP_TEST:'1',MEETUP_USER_DATA:profile};delete env.ELECTRON_RUN_AS_NODE;
 const executablePath=process.env.MEETUP_EXECUTABLE||path.join(root,'desktop-output/win-unpacked/HangzhouMeetUp.exe');
 let application;
-async function launch(){application=await electron.launch({executablePath,args:[],cwd:root,env,timeout:60000});const page=await application.firstWindow();await page.waitForSelector('#desktop-updates');await page.waitForSelector('.leaflet-pane',{state:'attached'});return page;}
+async function launch(){application=await electron.launch({executablePath,args:[],cwd:root,env,timeout:60000});const page=await application.firstWindow();await page.waitForSelector('#desktop-updates');await page.waitForSelector('.leaflet-pane',{state:'attached'});assert.equal((await page.evaluate(()=>window.desktop.status())).configured,true,'Private configuration survives launch');return page;}
 async function feed(payload){
   await application.evaluate(async({app},payload)=>{
     const {join}=process.getBuiltinModule('path');const appRequire=process.getBuiltinModule('module').createRequire(join(app.getAppPath(),'package.json'));
@@ -42,6 +42,7 @@ try{
   await page.locator('#desktop-updates').click();await page.locator('#update-download').click();await settle(page,'downloaded');assert.match(await page.locator('#update-install').textContent(),/刷新/);
   await page.locator('#update-install').click();await settle(page,'current');assert.equal(await page.evaluate(()=>document.documentElement.dataset.patch),next(1));assert.equal(application.process().pid,pid);assert.equal(new URL(page.url()).origin,origin);assert.equal(await page.locator('#travel-buffer').inputValue(),'17');
   await application.close();page=await launch();assert.equal((await page.evaluate(()=>window.desktop.updateStatus())).currentVersion,next(1));assert.equal(await page.evaluate(()=>document.documentElement.dataset.patch),next(1));
+  for(let i=0;i<3;i++){await application.close();page=await launch();}
   await feed(patch(next(2),true));await page.evaluate(()=>window.desktop.checkUpdates());await page.evaluate(()=>window.desktop.downloadUpdate());
   // Navigation destroys the calling JS context; observe the resulting state separately.
   page.evaluate(()=>window.desktop.installUpdate()).catch(()=>{});await settle(page,'error');assert.equal(await page.evaluate(()=>document.documentElement.dataset.patch),next(1));
