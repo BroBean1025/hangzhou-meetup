@@ -41,7 +41,7 @@
   sideHandle.querySelector('button').textContent=level==='collapsed'?'展开路线':'收起路线';sideHandle.querySelector('button').setAttribute('aria-expanded',String(level!=='collapsed'));
   body.inert=level==='collapsed'||level==='summary';
  }
- function persist(){try{localStorage.setItem(key,JSON.stringify(state));}catch{}document.dispatchEvent(new Event('change',{bubbles:true}));}
+ function persist(){try{const latest=JSON.parse(localStorage.getItem(key))??{};localStorage.setItem(key,JSON.stringify({...latest,...state}));}catch{}document.dispatchEvent(new Event('change',{bubbles:true}));}
  function bind(handle,field){
   handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label',field==='top'?'调整顶部设置区大小':'调整路线结果区大小');handle.setAttribute('aria-valuemin','0');handle.setAttribute('aria-valuemax','100');handle.setAttribute('aria-orientation',field==='top'?'horizontal':'vertical');
   handle.querySelector('button').onclick=()=>{state[field]=(field==='side'?side.dataset.level==='collapsed':state.top===0)?1:0;render();persist();};

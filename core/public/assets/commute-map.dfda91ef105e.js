@@ -338,7 +338,9 @@ function renderJourneyKey(){
   const r=lastResults.find(r=>r.origin_id===c.id),ready=r&&completeRoute(r),identity=routeIdentity(c.id);
   return '<button class="journey-chip" data-journey="'+esc(c.id)+'" style="--journey-color:'+identity.color+'" aria-pressed="'+(routeFocus===c.id)+'" '+(!ready?'disabled':'')+'>'+routeBadge(c.id)+'<span>'+esc(c.short_name)+'</span><small>'+(!r||r.preview?'查询中':r.error?'暂无路线':minute(r.total_seconds)+'分')+'</small></button>';
  }).join('');
- for(const b of key.querySelectorAll('[data-journey]'))b.onclick=()=>showRoute(b.dataset.journey);
+ // Stop before rendering replaces the clicked element: Leaflet can no longer
+ // find its HUD ancestor once it has been detached from the document.
+ for(const b of key.querySelectorAll('[data-journey]'))b.onclick=e=>{e.stopPropagation();showRoute(b.dataset.journey);};
 }
 function syncJourneyMarkers(){
  for(const c of campuses){
