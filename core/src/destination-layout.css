@@ -77,7 +77,9 @@ dialog{max-height:85svh}dialog h2{margin-right:65px;overflow-wrap:anywhere}#stat
 .map-hud{position:absolute;left:0;top:0;pointer-events:none}
 .map-hud>.paper-note,.map-hud>.controls,.map-hud>#journey-key,.map-hud>#access-detail-bar{pointer-events:auto}
 #map .leaflet-popup-content{overflow-wrap:anywhere}
-#map .leaflet-tooltip{max-width:min(240px,calc(100vw - 40px));white-space:normal;overflow-wrap:anywhere}
+/* Leaflet panes have no intrinsic width. Size the bubble from its text first,
+   then cap it to the actual map, rather than shrink-to-fit the zero-width pane. */
+#map .leaflet-tooltip{width:max-content;max-width:min(320px,var(--map-tooltip-width,calc(100vw - 40px)));box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;line-height:1.6}
 .shared-route-popup{max-height:min(340px,50svh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px}
 .shared-route-popup button{min-height:36px;text-align:left}
 #journey-key{position:absolute;z-index:650;left:16px;top:16px;width:240px;max-width:calc(100% - 145px);padding:11px;background:#fffaf0f5;border:1px solid #c6c5b5;border-radius:4px 9px 4px 7px;box-shadow:2px 3px 0 #c7c6b440}

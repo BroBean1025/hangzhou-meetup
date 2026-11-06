@@ -34,6 +34,8 @@ let accessLayer=null,accessDetail=null,accessLabels=[],accessPreviousView=null;
 let interchangeLayer=null,transferCaptions=[];
 const accessStyles={walk:{color:'#75654d',dashArray:'1 6',name:'步行'},bike:{color:'#277c68',dashArray:'8 5',name:'骑行'},bus:{color:'#a34c7a',dashArray:'11 5',name:'公交'},taxi:{color:'#5268b2',dashArray:'11 4 2 4',name:'打车'}};
 const map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:.25,zoomDelta:.75,minZoom:7,maxZoom:17,preferCanvas:true,fadeAnimation:false,zoomAnimation:false}).setView([D.origin.lat,D.origin.lon],11);
+function sizeMapTooltips(){map.getContainer().style.setProperty('--map-tooltip-width',Math.max(1,map.getSize().x-32)+'px')}
+map.on('resize',sizeMapTooltips);sizeMapTooltips();
 map.attributionControl.setPrefix(false);map.attributionControl.addAttribution('地理 © <a href="https://www.openstreetmap.org/copyright">OSM</a> · 地铁 <a href="https://openmetro.dev">OpenMetro</a>');L.control.scale({imperial:false,maxWidth:90}).addTo(map);
 // All geographic labels belong to Leaflet's stack: tracks < labels < origins
 // < tooltips (650) < popups (700). A sibling outside mapPane would cover popups.
