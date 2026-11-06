@@ -5,6 +5,7 @@ const minute=s=>s===null||s===undefined?'未知':String(Math.round(s/60));
 const stationTime=p=>p.seconds===null?'时间未知':'约 '+minute(p.seconds)+' 分钟';
 const points=new Map(D.points.map(p=>[p.id,p])),lines=new Map(D.lines.map(l=>[l.id,l]));
 const stationChoices=createStationCatalog(D);
+const railDisplay=createRailDisplay(D);
 const lineOrder=(a,b)=>(a.id.startsWith('regional-')?1:0)-(b.id.startsWith('regional-')?1:0)||a.name.localeCompare(b.name,'zh-CN',{numeric:true});
 const stationLineText=p=>p.lines.map(id=>lines.get(id)).filter(Boolean).sort(lineOrder).map(l=>l.name).join(' / ');
 const transferZoom=11.75,localZoom=13.25,gateZoom=14.25;
@@ -80,9 +81,10 @@ for(const group of shared.values())for(let i=0;i<group.length;i++){
  const r={s,a,b,rail,color,coordinates,hasGeometry,offset:(i-(group.length-1)/2)*3.5};railLayers.push(r);railByEdge.set(railKey(s.line,s.from,s.to),r);
 }
 function railCoordinates(r){
- if(!r.offset)return r.coordinates;
- const projected=r.coordinates.map(p=>map.latLngToLayerPoint(p)),offset=r.offset*(r.s.from<r.s.to?1:-1);
- return projected.map((p,i)=>{const before=projected[Math.max(0,i-1)],after=projected[Math.min(projected.length-1,i+1)],dx=after.x-before.x,dy=after.y-before.y,length=Math.hypot(dx,dy)||1;return map.layerPointToLatLng(L.point(p.x-dy/length*offset,p.y+dx/length*offset));});
+ const coordinates=railDisplay.coordinates(r.s,map.getZoom());
+ if(!r.offset)return coordinates;
+ const projected=coordinates.map(p=>map.latLngToLayerPoint(p)),offset=r.offset*(r.s.from<r.s.to?1:-1);
+ return projected.map((p,i)=>{const before=projected[Math.max(0,i-1)],after=projected[Math.min(projected.length-1,i+1)],dx=after.x-before.x,dy=after.y-before.y,length=Math.hypot(dx,dy)||1,taper=Math.min(1,p.distanceTo(projected[0])/16,p.distanceTo(projected.at(-1))/16);return map.layerPointToLatLng(L.point(p.x-dy/length*offset*taper,p.y+dx/length*offset*taper));});
 }
 function samplePolyline(projected,distance){
  let remaining=distance;
@@ -142,11 +144,11 @@ function buildJourneyStrokes(edges){
    const chunks=[],directions=[];let coords=[];
    while(true){
     const item=adjacency.get(node).find(e=>remaining.has(e));if(!item)break;remaining.delete(item);
-    const forward=node===item.from,part=forward?item.rail.coordinates:[...item.rail.coordinates].reverse();
+    const display=railDisplay.coordinates(item.rail.s,map.getZoom()),forward=node===item.from,part=forward?display:[...display].reverse();
     const last=coords.at(-1),first=part[0];
     if(coords.length&&(Math.abs(last[0]-first[0])>1e-7||Math.abs(last[1]-first[1])>1e-7)){chunks.push(coords);coords=[];}
     coords.push(...(coords.length?part.slice(1):part));
-    for(const d of item.edge.directions.values())directions.push({coords:d.from===item.from?item.rail.coordinates:[...item.rail.coordinates].reverse(),twoWay:item.edge.directions.size>1});
+    for(const d of item.edge.directions.values())directions.push({coords:d.from===item.from?display:[...display].reverse(),twoWay:item.edge.directions.size>1});
     node=forward?item.to:item.from;if(adjacency.get(node).length!==2||node===start)break;
    }
    if(coords.length)chunks.push(coords);
@@ -371,11 +373,21 @@ function syncRouteFocus(){
  for(const article of document.querySelectorAll('.campus-result')){article.classList.toggle('is-route-focused',article.dataset.origin===routeFocus);article.classList.toggle('journey-muted',!!routeFocus&&article.dataset.origin!==routeFocus);}
  for(const b of document.querySelectorAll('.show-route')){const focused=b.dataset.route===routeFocus;b.setAttribute('aria-pressed',String(focused));b.textContent=focused?'恢复全部':'聚焦这条路线';}
 }
-const transferLayer=L.layerGroup(),localLayer=L.layerGroup(),stationLabels=new Map();
+const transferLayer=L.layerGroup(),localLayer=L.layerGroup(),stationLabels=new Map(),stationDisplays=[];
 for(const p of D.points){if(hubIds.has(p.id))continue;
- const marker=L.circleMarker([p.lat,p.lon],{pane:'stations',radius:p.is_interchange?5:3.6,weight:p.is_interchange?2:1.2,color:p.is_interchange?'#445448':lines.get(p.lines[0])?.color??'#74816e',fillColor:'#fbf7e8',fillOpacity:1,bubblingMouseEvents:false});
- marker.on('click',()=>selectStation(p));marker.addTo(p.is_interchange?transferLayer:localLayer);
- const caption=document.createElement('button');caption.className='station-caption'+(p.is_interchange?' interchange':'');caption.textContent=p.name;caption.dataset.stationId=p.id;caption.hidden=true;caption.onclick=()=>selectStation(p);$('labels').append(caption);stationLabels.set(p.id,caption);
+ for(const [index,node] of railDisplay.nodes(p,17).entries()){
+  const marker=L.circleMarker([node.lat,node.lon],{pane:'stations',radius:p.is_interchange?5:3.6,weight:p.is_interchange?2:1.2,color:p.is_interchange?'#445448':lines.get(node.lines[0])?.color??'#74816e',fillColor:'#fbf7e8',fillOpacity:1,bubblingMouseEvents:false});
+  marker.on('click',()=>selectStation(p));
+  const caption=document.createElement('button');caption.className='station-caption'+(p.is_interchange?' interchange':'');caption.dataset.stationId=p.id;caption.hidden=true;caption.onclick=()=>selectStation(p);$('labels').append(caption);stationLabels.set(p.id+'|'+index,caption);
+  stationDisplays.push({p,node,index,marker,caption,layer:p.is_interchange?transferLayer:localLayer});
+ }
+}
+function syncStationDisplays(){
+ const split=map.getZoom()>=railDisplay.splitZoom;
+ for(const item of stationDisplays){const {p,node,index,marker,caption,layer}=item,on=split||index===0;item.visible=on;item.position=split?node:p;
+  marker.setLatLng([item.position.lat,item.position.lon]);if(on&&!layer.hasLayer(marker))layer.addLayer(marker);if(!on&&layer.hasLayer(marker))layer.removeLayer(marker);
+  caption.textContent=p.name+(split&&railDisplay.nodes(p,17).length>1?' · '+node.lines.map(id=>lines.get(id)?.name??id).join('/'):'');
+ }
 }
 const campusMarkers=new Map(),campusLabels=new Map(),gateDetails=[];
 map.getPane('gates').style.pointerEvents='none';
@@ -512,7 +524,7 @@ function updateLabels(){
  // Labels use viewport coordinates; cancel mapPane's pan translation while
  // keeping them in its stacking context, including after resize and auto-pan.
  for(const layer of [$('labels'),mapHud]){L.DomUtil.setPosition(layer,map.containerPointToLayerPoint([0,0]));layer.style.width=size.x+'px';layer.style.height=size.y+'px';}
- syncGateDetails(z);
+ syncGateDetails(z);syncStationDisplays();
  $('labels').style.setProperty('--origin-font',(10+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--hub-font',(11+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--station-font',(9+3*scale).toFixed(1)+'px');
  for(const [layer,on] of [[transferLayer,current>=1],[localLayer,current>=2]]){if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)}
  $('mode').textContent=z>=gateZoom?'校门细节 · 点地图查询到达时间':['交通枢纽和出发点 · 放大显示换乘站','换乘站 · 再放大显示普通站','全部地铁站 · 再放大显示校门'][current];
@@ -520,9 +532,15 @@ function updateLabels(){
  const used=[],connectors=[],mapBox=$('map').getBoundingClientRect();
  for(const el of document.querySelectorAll('.paper-note,.controls,.line-legend,.map-mode,#status,.compass,.leaflet-control,#access-detail-bar,#journey-key,#journey-guide')){if(el.hidden||!el.getClientRects().length)continue;const box=el.getBoundingClientRect(),r={x:box.left-mapBox.left,y:box.top-mapBox.top,w:box.width,h:box.height};if(r.x+r.w>0&&r.y+r.h>0&&r.x<size.x&&r.y<size.y)used.push(r);}
  for(const ll of [...journeyBadgePositions,...meetingBadgePositions]){const p=map.latLngToContainerPoint(ll);used.push({x:p.x-(ll.badgeWidth??30)/2,y:p.y-15,w:ll.badgeWidth??30,h:30});} const icons=[];for(const h of D.hubs.filter(h=>!hubHasOrigin(h))){const p=map.latLngToContainerPoint([h.lat,h.lon]);icons.push({id:'hub:'+h.name,x:p.x-16,y:p.y-16,w:32,h:32});}for(const c of campuses.filter(c=>enabled.has(c.id))){const p=map.latLngToContainerPoint([(c.displayOrigin??c).lat,(c.displayOrigin??c).lon]);icons.push({id:c.id,x:p.x-19,y:p.y-19,w:38,h:38});}
+ // A viewport grid avoids testing every label against the whole rail network.
+ const trackGrid=new Map(),cell=64;
+ function cells(r,visit){for(let x=Math.max(0,Math.floor((r.x-4)/cell));x<=Math.min(Math.floor(size.x/cell),Math.floor((r.x+r.w+4)/cell));x++)for(let y=Math.max(0,Math.floor((r.y-4)/cell));y<=Math.min(Math.floor(size.y/cell),Math.floor((r.y+r.h+4)/cell));y++)visit(x+','+y);}
+ for(const item of railLayers){const coords=item.rail.getLatLngs().map(ll=>map.latLngToContainerPoint(ll));for(let i=1;i<coords.length;i++){const a=coords[i-1],b=coords[i],r={x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)};cells(r,key=>{if(!trackGrid.has(key))trackGrid.set(key,[]);trackGrid.get(key).push([a,b]);});}}
+ function crossesTrack(r){let found=false;cells(r,key=>{if(!found)found=(trackGrid.get(key)??[]).some(([a,b])=>railCrossesLabel(a,b,r));});return found;}
+ for(const item of stationDisplays){if(!item.visible||current===0||current===1&&!item.p.is_interchange)continue;const p=map.latLngToContainerPoint(item.marker.getLatLng());icons.push({x:p.x-8,y:p.y-8,w:16,h:16});}
  function place(p,el,key,gap=20,detail=false){const pos=map.latLngToContainerPoint([p.lat,p.lon]);el.hidden=pos.x<5||pos.x>size.x-5||pos.y<5||pos.y>size.y-20;if(el.hidden)return;
   const w=el.offsetWidth,h=el.offsetHeight;let chosen=null;
-  for(const ring of detail?[0,7]:[0,14,28,42,60]){const g=gap+ring;for(const [dx,dy] of [[g,-h/2],[-w-g,-h/2],[-w/2,-h-g],[-w/2,g],[g,-h-g],[-w-g,g],[g,g],[-w-g,-h-g]]){const r={x:pos.x+dx,y:pos.y+dy,w,h};if(r.x<3||r.y<3||r.x+w>size.x-3||r.y+h>size.y-25)continue;if([...used,...icons].some(b=>overlap(r,b)>0))continue;chosen=r;break;}if(chosen)break;}
+  for(const ring of detail?[0,7]:[0,14,28,42,60]){const g=gap+ring;for(const [dx,dy] of [[g,-h/2],[-w-g,-h/2],[-w/2,-h-g],[-w/2,g],[g,-h-g],[-w-g,g],[g,g],[-w-g,-h-g]]){const r={x:pos.x+dx,y:pos.y+dy,w,h};if(r.x<3||r.y<3||r.x+w>size.x-3||r.y+h>size.y-25)continue;if([...used,...icons].some(b=>overlap({x:r.x-2,y:r.y-2,w:r.w+4,h:r.h+4},b)>0))continue;if((el.classList.contains('station-caption')||detail)&&crossesTrack(r))continue;chosen=r;break;}if(chosen)break;}
   if(!chosen){el.hidden=true;return;}used.push(chosen);el.style.left=chosen.x+'px';el.style.top=chosen.y+'px';if(!detail)el.setAttribute('aria-pressed',String(selected===p.id));const ex=Math.max(chosen.x,Math.min(chosen.x+w,pos.x)),ey=Math.max(chosen.y,Math.min(chosen.y+h,pos.y));if(!detail&&Math.hypot(ex-pos.x,ey-pos.y)>12)connectors.push('<path d="M'+pos.x.toFixed(1)+' '+pos.y.toFixed(1)+'L'+ex.toFixed(1)+' '+ey.toFixed(1)+'" stroke="#8c9b88" stroke-width=".5" fill="none"/>');
  }
  for(const item of accessLabels)place(item,item.el,'access',12);
@@ -530,7 +548,7 @@ function updateLabels(){
  for(const c of [...campuses].sort((a,b)=>Number(b.id===primary)-Number(a.id===primary))){const label=campusLabels.get(c.id);label.hidden=!enabled.has(c.id)||accessDetail?.id===c.id;if(label.hidden)continue;label.querySelector('.name').innerHTML=(routeSelectionActive?routeBadge(c.id):'')+esc(z<13?c.short_name:c.name);const routeGate=routeSelectionActive?lastResults.find(r=>r.origin_id===c.id&&completeRoute(r))?.gate_label:null;label.querySelector('.sub').textContent=(routeGate??(c.kind==='station'?(c.group_id?'两站区择优':'站内'):z>=gateZoom?(c.gate_options.find(g=>c.descriptor.gates.includes(g.key))?.label??c.gate_label)+' · 已选':c.gate_label))+(c.id===primary?' · 主':'');label.querySelector('.sub').hidden=z<11;place(c.displayOrigin??c,label,c.id,22);}
  const detailedResult=accessDetail&&lastResults.find(r=>r.origin_id===accessDetail.id),detailSegment=detailedResult&&accessSegments(detailedResult).find(s=>s.kind===accessDetail.kind),detailStation=detailSegment?.to_station_id??(accessDetail?.kind==='access'?detailedResult?.origin_station_id:accessDetail?.kind==='egress'?detailedResult?.destination_station_id:null);
  for(const h of D.hubs){const el=hubLabels.get(h.name);el.querySelector('.time').hidden=z<11;if(hubHasOrigin(h)||(selected&&h.member_ids.includes(selected))||(detailStation&&h.member_ids.includes(detailStation)))el.hidden=true;else place(h,el,'hub:'+h.name,21);hubRows.get(h.name).setAttribute('aria-pressed',String(selected===h.id));}
- for(const p of [...D.points].filter(p=>!hubIds.has(p.id)).sort((a,b)=>Number(b.is_interchange)-Number(a.is_interchange))){const el=stationLabels.get(p.id);if(current===0||(current===1&&!p.is_interchange)||enabled.has('station:'+p.id)||p.id===selected||p.id===detailStation){el.hidden=true;continue;}place(p,el,p.id,7);}
+ for(const item of [...stationDisplays].sort((a,b)=>Number(b.p.is_interchange)-Number(a.p.is_interchange))){const {p,caption:el}=item;if(!item.visible||current===0||(current===1&&!p.is_interchange)||enabled.has('station:'+p.id)||p.id===selected||p.id===detailStation){el.hidden=true;continue;}place({...p,...item.position},el,p.id,7);}
  for(const {g,el,visible} of gateDetails){if(visible)place(g,el,'gate:'+g.key,6,true);}
  $('label-lines').innerHTML=connectors.join('');
 }

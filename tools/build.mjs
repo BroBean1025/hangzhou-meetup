@@ -22,7 +22,7 @@ for(const c of data.campuses){
 const geo=JSON.parse(await readFile(path.join(root,'data/geography.json'),'utf8'));
 const safeJson=x=>JSON.stringify(x).replaceAll('<','\\u003c');
 refs.set('map-data.js',await asset('map-data',`document.getElementById('dataset').textContent=${JSON.stringify(safeJson(data))};\ndocument.getElementById('geography').textContent=${JSON.stringify(safeJson(geo))};`,'.js'));
-const names=['vendor/leaflet.js','vendor/leaflet.css','commute-map.js','commute-map.css','destination-layout.css','destination-picker.js','map-icons.js','station-catalog.js','trip-time.js','trip-time.css','trip-planner-ui.js','window-layout.css','desktop-settings.js','desktop-updates.js'];
+const names=['vendor/leaflet.js','vendor/leaflet.css','rail-display.js','commute-map.js','commute-map.css','destination-layout.css','destination-picker.js','map-icons.js','station-catalog.js','trip-time.js','trip-time.css','trip-planner-ui.js','window-layout.css','desktop-settings.js','desktop-updates.js'];
 for(const name of names)refs.set(name,await asset(name.slice(0,name.lastIndexOf('.')),await readFile(path.join(root,'src',name)),path.extname(name)));
 let html=await readFile(path.join(root,'src/index.html'),'utf8');
 html=html.replaceAll('\r\n','\n');
