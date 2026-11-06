@@ -82,7 +82,7 @@ export class UpdateController {
       try{
         await this.beforeInstall();this.version=await this.hot.apply();this.checked=false;this.manifest=null;
         await this.write({availableVersion:null,releaseNotes:''});
-        return this.set({phase:'current',currentVersion:this.version,availableVersion:null,releaseNotes:'',progress:0,message:'界面补丁已生效，桌面外壳无需重启。'});
+        return this.set({phase:'current',currentVersion:this.version,availableVersion:null,releaseNotes:'',progress:0,message:'界面补丁已生效，客户端无需重启。'});
       }catch{this.manifest=null;this.checked=false;return this.set({phase:'error',kind:'cold',message:'补丁未能正常加载，已恢复之前的界面。可重新检查并下载完整版本。'});}
     }
     if(this.portable)return this.snapshot();

@@ -38,7 +38,7 @@ core/            核心网页与后端
   config/        校区校门、站区连接与路线快照
   data/          地图数据与校徽
   server.mjs     HTTP 服务
-desktop/         Windows 应用外壳与更新逻辑
+desktop/         Windows 应用客户端与更新逻辑
 tools/           初始化、构建、发布检查与打包
   tests/         离线测试
   docker/        Docker 部署配置

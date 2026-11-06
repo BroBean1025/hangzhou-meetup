@@ -7,7 +7,7 @@
   const $=selector=>dialog.querySelector(selector);
   function render(state){
     const busy=['checking','downloading','installing'].includes(state.phase);
-    $('.update-version').textContent='当前界面 '+state.currentVersion+' · 外壳 '+state.shellVersion+(state.availableVersion?' · 新版本 '+state.availableVersion:'');
+    $('.update-version').textContent='当前界面 '+state.currentVersion+' · 客户端 '+state.shellVersion+(state.availableVersion?' · 新版本 '+state.availableVersion:'');
     $('#update-message').textContent=state.message;
     $('#update-message').classList.toggle('update-error',state.phase==='error');
     $('#update-progress').hidden=state.phase!=='downloading';$('#update-progress').value=state.progress;

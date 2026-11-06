@@ -29,7 +29,7 @@ npm start
 
 浏览器打开 **http://localhost:8080**，保持终端开启。Windows 用户也可以双击 `启动地图.cmd`，首次运行会创建并打开配置文件。退出时在终端按 `Ctrl+C`。
 
-核心服务只使用 Node.js 内置模块，运行它无需 `npm install`，也无需 Electron、ChatGPT、Codex 或 Python。源码 ZIP 是完整仓库，包含可选的 `desktop/` 目录；浏览器运行方式不会加载桌面外壳或更新模块。`core/public/` 已包含构建好的网页，直接启动即可。
+核心服务只使用 Node.js 内置模块，运行它无需 `npm install`，也无需 Electron、ChatGPT、Codex 或 Python。源码 ZIP 是完整仓库，包含可选的 `desktop/` 目录；浏览器运行方式不会加载客户端或更新模块。`core/public/` 已包含构建好的网页，直接启动即可。
 
 `doctor` 检查所需文件和 Key 是否填入，不会显示 Key 或消耗高德接口额度，也不验证账户权限与余额。修改 `.env` 后需要重启服务；若系统已经有同名环境变量，Node 会优先使用系统环境变量。
 
