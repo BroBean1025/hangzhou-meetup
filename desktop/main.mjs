@@ -134,7 +134,7 @@ else{
     ipcMain.handle('desktop:read-preferences',event=>trusted(event)?settings.preferences??{}:{});
     ipcMain.on('desktop:write-preferences',(event,value)=>{
       if(!trusted(event)||!value||typeof value!=='object')return;
-      settings.preferences=Object.fromEntries(Object.entries(value).filter(([key,v])=>['hangzhou-origins-v2','hangzhou-trip-buffer-v1'].includes(key)&&typeof v==='string'&&v.length<100000));saveSettings();
+      settings.preferences=Object.fromEntries(Object.entries(value).filter(([key,v])=>['hangzhou-origins-v2','hangzhou-trip-buffer-v1','hangzhou-route-preferences-v1'].includes(key)&&typeof v==='string'&&v.length<100000));saveSettings();
     });
     Menu.setApplicationMenu(Menu.buildFromTemplate([
       {label:'应用',submenu:[{label:'高德服务设置…',click:settingsDialog},{type:'separator'},{label:'退出',role:'quit'}]},

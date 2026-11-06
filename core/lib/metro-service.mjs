@@ -5,6 +5,7 @@ import regional from '../config/regional-network.json' with { type: 'json' };
 import walkingSnapshot from '../config/walking-snapshot.json' with { type: 'json' };
 import {mergeCatalog,RegionalRouter} from './regional-network.mjs';
 import {stationDepartures} from './route-timing.mjs';
+import {queryPreferred} from './route-preferences.mjs';
 
 const API = 'https://openmetro.dev/api/networks/cn-hangzhou';
 const LABEL = {walk:'步行',bus:'公交',bike:'骑行',taxi:'打车'};
@@ -223,9 +224,9 @@ export class MetroService {
     if(Math.abs(result.total_seconds-row.seconds)>1)throw new QueryError('步行换乘路线与可达时间不一致，请刷新后重试。');
     return result;
   }
-  async metroResult(engine,base,end,egress,errors=[]){
+  async metroResult(engine,base,end,egress,errors=[],preferredPlan=null){
     const origin=engine.options.find(o=>o.station.id===base.via_id);
-    const plan=await this.route(origin.station.id,end.id);
+    const plan=preferredPlan??await this.route(origin.station.id,end.id);
     if(Math.abs(sec(plan.total_seconds)-base.metro_seconds)>1)throw new QueryError('路线与可达时间不一致，请稍后刷新查询。');
     const router=await this.railRouter();
     const legs=plan.legs.map(l=>({...router.timedLeg(l),line_name:this.lines.get(l.line_id),station_names:(l.station_ids||[l.from_station_id,l.to_station_id]).map(id=>this.stations.get(id).name)}));
@@ -263,6 +264,7 @@ export class MetroService {
     return {...result,origin_group:startGroup?.name,destination_group:endGroup?.name,destination:{name:sid?(endGroup?.name??this.stations.get(sid).name):'地图选点',lon,lat,crs:'wgs84'},origin_location:{lon:ox,lat:oy,crs:'wgs84'},scope:(d.kind==='station'?'station':'gate')+(sid?'_to_station':'_to_point'),cached:false,synced_at:this.version,warnings:[...result.warnings,...engine.errors,...[startGroup,endGroup].filter(Boolean).map(g=>g.connection_note),'静态网络时间估算，不是实时列车时间；不判断首末班、停运或当前能否乘车。',d.kind==='station'?'从指定地铁站内起算，不含前往该站的接驳。':'从所选校门起算，不含校内步行。','杭州段不含候车；跨城段含供应商固定预留。进出站及安检另计，站点参考坐标未逐出入口核验。']};
   }
   async query(payload){
+    if(payload.preferences!==undefined){try{return await queryPreferred(this,payload,{gcjToWgs,wgsToGcj,distance});}catch(e){throw new QueryError(e.message);}}
     const d=this.normalize(payload.origin),name=d.kind==='station'?(this.group(d.station_id)?.name??this.stations.get(d.station_id).name):config.campuses.find(c=>c.id===d.id).name;
     const options=[],errors=[];
     for(const gate of d.gates)try{options.push({...await this.queryGate(d,gate,payload),origin_id:d.id,origin_name:name,gate_key:gate,gate_label:this.gateLabel(d,gate),origin_kind:d.kind,requested_access_mode:d.mode});}catch(e){errors.push(this.gateLabel(d,gate)+'：'+e.message);}

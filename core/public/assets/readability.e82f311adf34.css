@@ -1,0 +1,27 @@
+/* Readable controls and a clear order: duration → transfers/fare → alternatives → detail. */
+body{font-size:15px}button,input,select{font-family:var(--sans)}
+.route-preferences{flex:none;padding:10px 22px;border-bottom:1px solid var(--line);background:#f7f5eb;position:relative;z-index:790}
+.preference-main{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.preference-main>strong{font-size:14px;font-weight:600}
+.preference-switch{display:flex;padding:3px;background:#e6e9dc;border:1px solid #c5ceba;border-radius:8px;gap:3px}
+.preference-switch button{border:0;background:transparent;border-radius:5px;padding:7px 16px;font-size:14px;min-height:34px;float:none}
+.preference-switch button[aria-pressed=true]{background:#fffdf5;color:#315b43;box-shadow:0 1px 4px #314d3822;font-weight:700}
+.preference-hint{font-size:12px;color:#64715f}.east-preference{display:flex;gap:9px;align-items:flex-start;margin-top:10px;font-size:14px;line-height:1.65}.east-preference[hidden]{display:none}.east-preference input{accent-color:#486d50;width:17px;height:17px;margin-top:4px;flex:none}.east-preference small{display:block;color:#6a7665;font-size:12px}
+.route-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;font-size:14px;line-height:1.5}
+.route-metric{padding:7px 10px;border-radius:6px;background:#e7eddf;color:#34543c;border:1px solid #b8c9ac;font-size:15px;font-weight:600}.route-metric.fare{background:#f3ebd9;color:#755a2c;border-color:#d6c8a9}
+.route-meta .show-route{float:none;font-size:13px;min-height:34px;padding:5px 8px;margin-left:auto}
+.route-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0}
+.route-choices button{display:grid;gap:5px;min-width:0;float:none;text-align:left;white-space:normal;padding:10px 9px;border:1px solid #c4cdb9;background:#faf8ef;border-radius:7px;line-height:1.55}
+.route-choices button[aria-pressed=true]{border-color:#527d59;background:#eaf1e2;box-shadow:inset 0 0 0 1px #527d59}
+.route-choices strong{font-size:13px;color:#3f5c3b}.route-choices span{font-size:13px}.route-choices small{font-size:12px;color:#66735f}.route-choices button:disabled{opacity:.65;cursor:wait}
+.preference-note,.station-arrival{font-size:13px;line-height:1.65;margin:7px 0;color:#586b50}.station-arrival{padding:8px 10px;background:#f0eee2;border-left:3px solid #8c9f78;border-radius:3px}
+#comparison{line-height:1.7}.result-heading strong{font-size:18px}.result-heading small{font-size:12px}.result-time{font-size:29px}.result-time small{font-size:13px}
+.popup-route,.popup-breakdown,.route-legs{font-size:14px;line-height:1.8}.campus-result details>summary{font-size:13px;padding:6px 0}.popup-sub,.popup-footnote,.comparison-note,#meeting-note{font-size:12px;line-height:1.7}
+#meeting-panel>summary{font-size:15px}#meeting-results{font-size:14px}.meeting-times,.meeting-times .scheduled-arrival{font-size:13px}.meeting-schedule{font-size:13px}.meeting-schedule b{font-size:16px}
+.departure-plan{font-size:13px;padding:11px}.departure-plan b{font-size:20px}.departure-plan small{font-size:12px}
+.time-planner>summary{font-size:14px}.time-planner>summary span,.time-planner label{font-size:12px}.time-planner input{font-size:14px}.time-planner button{font-size:12px}.time-planner p{font-size:12px}
+.destination-input-row input{font-size:15px}.destination-input-row button,#destination-selection{font-size:13px}.origin-panel-tools,.origin-panel-title small,#origin-primary-summary{font-size:12px}.origin-panel-summary{font-size:14px}
+.hub-row{font-size:13px}.sidebar-note{font-size:12px}#journey-list{font-size:13px}#journey-key p,#journey-guide small{font-size:12px}#status,.map-mode{font-size:12px}.line-legend{font-size:12px}
+#desktop-settings,#desktop-updates{font-size:13px}.update-actions button,#desktop-update-dialog .update-checked{font-size:13px}
+@media(min-width:1001px){.stage:has(#comparison:not([hidden])){grid-template-columns:minmax(0,1fr) clamp(340px,30vw,430px)}}
+@media(max-width:1000px){.route-preferences{padding:10px 16px}.preference-hint{display:none}}
+@media(max-width:650px){.route-preferences{padding:9px 12px}.preference-main{gap:10px}.preference-switch{flex:1}.preference-switch button{flex:1;padding:6px 10px}.east-preference{font-size:13px}.route-meta .show-route{margin-left:0}.route-metric{font-size:14px}.result-heading strong{font-size:17px}.popup-route,.route-legs{font-size:14px}.time-planner>summary span{font-size:12px}.current-clock small{font-size:11px}#desktop-settings,#desktop-updates,header #about{font-size:11px}.route-choices{gap:6px}}

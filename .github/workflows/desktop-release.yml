@@ -62,6 +62,10 @@ jobs:
         run: node tools/check-desktop-package.mjs
       - name: Verify hot activation and rollback in packaged Electron
         run: node tools/test-hot-desktop.mjs
+      - name: Verify route preferences and readable layouts in packaged Electron
+        env:
+          MEETUP_EXECUTABLE: desktop-output/win-unpacked/HangzhouMeetUp.exe
+        run: node tools/test-preferences-desktop.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: windows-desktop-${{ steps.version.outputs.version }}

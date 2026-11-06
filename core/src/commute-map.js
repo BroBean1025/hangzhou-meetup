@@ -1,7 +1,7 @@
 'use strict';
 const D=JSON.parse(document.getElementById('dataset').textContent),G=JSON.parse(document.getElementById('geography').textContent);
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const minute=s=>s===null||s===undefined?'未知':String(Math.round(s/60));
+const minute=s=>s===null||s===undefined?'未知':String(Math.ceil(s/60));
 const stationTime=p=>p.seconds===null?'时间未知':'约 '+minute(p.seconds)+' 分钟';
 const points=new Map(D.points.map(p=>[p.id,p])),lines=new Map(D.lines.map(l=>[l.id,l]));
 const stationChoices=createStationCatalog(D);
@@ -291,7 +291,7 @@ function renderMeetings(){
   const p=points.get(candidate.sid),who=candidate.members.map(m=>byCampus.get(m.id).short_name).join(' ＋ ');
   return '<article class="meeting-card" data-meeting-card="'+i+'"><div class="meeting-title"><span class="meeting-members">'+meetingBadges(candidate)+'</span><strong>'+esc(p.name)+'</strong><small>'+candidate.members.length+'/'+enabled.size+' 起点</small></div><p class="meeting-who">'+esc(who)+'汇合</p>'+meetingTrunk(candidate)+(window.meetingScheduleHTML?.(candidate)??'')+'<div class="meeting-times">'+candidate.members.map(m=>'<span>'+routeBadge(m.id)+esc(byCampus.get(m.id).short_name)+'<small>'+esc(m.gate??'')+'</small>'+(window.meetingMemberTime?.(candidate,m)??'<b>'+(m.seconds===null?'逐站时间未知':minute(m.seconds)+'分')+'</b>')+'</span>').join('')+'</div><p>'+(window.meetingTimingSummary?.(candidate)??'当前路线到站时间估计')+'</p><div class="meeting-actions"><button data-meeting-locate="'+i+'">地图定位</button><button data-meeting-select="'+i+'">设为目的地</button></div></article>';
  }).join('')||(pending?'<p>等待各起点路线完成，再找开始同行的汇合站…</p>':'<p>当前行程没有中途合流点：需要从不同来路到站，随后乘同一线路、同一方向继续。仅交叉或到站后各走各的，不算合流。</p>');
- $('meeting-note').textContent=(failed?'部分起点查询失败，建议只包含成功行程。':'')+'只推荐不同来路开始共用同向区间的站，不重复推荐已同行的下游站；第三人加入可形成新的合流点。按参与人数、到站时间差、最晚到达时间排序。到站时间沿当前行程累计，包含该行程已发生的接驳和换乘；缺少逐站权重时不猜测钟点。设置到达时间后，按每人途中缓冲、每处汇合预留协调出发；请另约具体碰面位置。';
+ $('meeting-note').textContent=(failed?'部分起点查询失败，建议只包含成功行程。':'')+'推荐开始同行的站点，按人数和到站时间差排序。设定到达时间可协调出发；具体碰面位置请自行约定。';
  for(const b of panel.querySelectorAll('[data-meeting-locate]'))b.onclick=()=>locateMeeting(Number(b.dataset.meetingLocate));
  for(const b of panel.querySelectorAll('[data-meeting-select]'))b.onclick=()=>selectStation(points.get(meetingCandidates[Number(b.dataset.meetingSelect)].sid));
  renderMeetingMarkers();
@@ -501,8 +501,9 @@ function resultCard(r){
  if(r.error)return html+'<div class="popup-error">'+esc(r.error)+'</div></article>';
  if(r.preview)return html+'<div class="popup-sub">'+(r.total_seconds==null?'正在查询完整时间和路线…':'已取得站点时间，正在查询路线…')+'</div></article>';
  html+='<div data-departure-for="'+esc(c.id)+'" hidden></div>';
- html+='<button class="journey-endpoints" data-route-heading="'+esc(c.id)+'" aria-label="聚焦'+esc(c.short_name)+'到'+esc(lastTarget?.name??'目的地')+'的路线">'+esc(c.short_name)+' <span>→</span> '+esc(lastTarget?.name??'目的地')+'</button><div class="route-line-tags">'+(r.legs??[]).filter(l=>l.kind==='ride').map(l=>'<span><i style="background:'+esc(lines.get(l.line_id)?.color??'#71816a')+'"></i>'+esc(l.line_name)+'</span>').join('')+'</div><div class="popup-route">'+routeDescription(r)+'</div>';
- html+='<div class="route-meta">'+(r.mode==='metro'?'换乘 '+r.transfers+' 次':'直接步行')+(r.fare!=null?' · 票价约 '+r.fare+' 元':'')+' <button class="show-route" data-route="'+c.id+'">在地图看路线</button></div>';
+ const journeyHTML='<button class="journey-endpoints" data-route-heading="'+esc(c.id)+'" aria-label="聚焦'+esc(c.short_name)+'到'+esc(lastTarget?.name??'目的地')+'的路线">'+esc(c.short_name)+' <span>→</span> '+esc(lastTarget?.name??'目的地')+'</button><div class="route-line-tags">'+(r.legs??[]).filter(l=>l.kind==='ride').map(l=>'<span><i style="background:'+esc(lines.get(l.line_id)?.color??'#71816a')+'"></i>'+esc(l.line_name)+'</span>').join('')+'</div><div class="popup-route">'+routeDescription(r)+'</div>';
+ html+='<div class="route-meta"><span class="route-metric">'+(r.mode==='metro'?'换乘 '+r.transfers+' 次':'直接步行')+'</span><span class="route-metric fare">'+(r.mode==='walk'?'无需车票':r.fare!=null?'票价约 '+r.fare+' 元':'票价待确认')+'</span><button class="show-route" data-route="'+c.id+'">查看路线</button></div>';
+ html+=(window.routeAlternativesHTML?.(r)??'')+journeyHTML;
  html+=accessOverview(r);
  if(r.legs?.some(l=>l.kind==='walk_transfer'))html+='<div class="popup-footnote">跨站区步行采用高德站点参考位置规划；室内通道和出入口以现场指引为准。出站换乘票价以实际计费为准。</div>';
  const crossSeconds=r.cross_station_seconds??r.legs?.filter(l=>l.kind==='walk_transfer').reduce((n,l)=>n+l.seconds,0)??0;
@@ -510,7 +511,7 @@ function resultCard(r){
  if(r.legs?.some(l=>l.line_id?.startsWith('regional-')))html+='<div class="popup-footnote">跨城段使用高德缓存规划估计（含供应商固定预留），杭州段使用 OpenMetro；均非实时列车时间。</div>';
  html+='<details><summary>时间拆分'+(r.mode==='metro'?'与经过站点':'')+'</summary><div class="popup-breakdown">'+parts.map(([n,v])=>'<span>'+n+'</span><span>'+minute(v)+' 分钟</span>').join('')+'</div>';
  if(r.mode==='metro')html+='<ol class="route-legs">'+r.legs.map(l=>'<li>'+(l.kind==='walk_transfer'?esc(l.label??'跨站区步行')+'：'+(l.station_names??[points.get(l.from_station_id)?.name,points.get(l.to_station_id)?.name]).map(esc).join(' → ')+'，约 '+minute(l.seconds)+' 分钟':l.kind==='transfer'?'在 '+esc(l.station_names[0])+' 换乘，步行约 '+minute(l.seconds)+' 分钟':esc(l.line_name)+'：'+l.station_names.map(esc).join(' → '))+'</li>').join('')+'</ol>';
- if(r.access_details?.instructions?.length)html+='<div class="access-directions"><b>到地铁站的接驳路线</b><ol>'+r.access_details.instructions.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ol></div>';html+='</details>';for(const note of r.access_details?.notes??[])html+='<div class="popup-footnote">'+esc(note)+'</div>';if(r.gate_errors?.length)html+='<div class="popup-error">部分校门未取得完整结果</div>';
+ if(r.access_details?.instructions?.length)html+='<div class="access-directions"><b>到地铁站的接驳路线</b><ol>'+r.access_details.instructions.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ol></div>';html+='</details>';for(const note of r.access_details?.notes??[])html+='<div class="popup-footnote">'+esc(note)+'</div>';if(r.gate_errors?.length&&!r.preference_warning)html+='<div class="popup-error">部分候选未取得完整结果</div>';
  if(r.warnings?.some(w=>w.startsWith('部分末段')))html+='<div class="popup-footnote">部分候选路线未取得，当前为已取得完整结果中的推荐。</div>';
  return html+'</article>';
 }
@@ -524,23 +525,23 @@ function showResults(data){
  const expanded=new Set([...$('comparison-results').querySelectorAll('article details[open]')].map(el=>el.closest('article').dataset.origin));
  const scrollTop=$('comparison').scrollTop,focused=document.activeElement,focusOrigin=focused?.closest('article')?.dataset.origin;
  const focusKind=focused?.matches('.show-route')?'.show-route':focused?.matches('.show-access')?'.show-access[data-kind="'+focused.dataset.kind+'"]':focused?.matches('summary')?'summary':null;
- lastResults=data.results;$('comparison-results').innerHTML=data.results.map(resultCard).join('');
+ lastResults=data.results;$('comparison-results').innerHTML=data.results.map(resultCard).join('');window.bindRouteAlternatives?.();
  for(const article of $('comparison-results').querySelectorAll('article')){if(expanded.has(article.dataset.origin)){const details=article.querySelector('details');if(details)details.open=true;}if(focusKind&&focusOrigin===article.dataset.origin)article.querySelector(focusKind)?.focus({preventScroll:true});}
  const summary=data.complete?(data.results.length>1?'最长约 '+minute(data.longest_seconds)+' 分钟 · 相差约 '+minute(data.spread_seconds)+' 分钟':'约 '+minute(data.longest_seconds)+' 分钟到达'):'部分出发点未取得完整时间，请查看各校说明';
  $('comparison-summary').textContent=summary;for(const b of document.querySelectorAll('[data-route-heading]'))b.onclick=()=>showRoute(b.dataset.routeHeading);for(const b of document.querySelectorAll('.show-route'))b.onclick=()=>showRoute(b.dataset.route);for(const b of document.querySelectorAll('.show-access'))b.onclick=()=>showAccess(b.dataset.access,b.dataset.kind);syncRouteFocus();$('comparison').scrollTop=scrollTop;
 }
 async function queryPoint(latlng,stationIds=null,name='地图选点'){
- clearQuery();lastTarget={latlng,stationIds,name};window.setDestinationUI?.(lastTarget);if(!stationIds)selected=null;lastQueryState='loading';lastResults=[];routeSelectionActive=true;
+ clearQuery();lastTarget={latlng,stationIds,name};window.setDestinationUI?.(lastTarget);window.syncDestinationPreferences?.();if(!stationIds)selected=null;lastQueryState='loading';lastResults=[];routeSelectionActive=true;
  clickedMarker=L.marker(latlng,{pane:'origin',interactive:false,keyboard:false,icon:L.divIcon({className:'journey-destination-marker',html:'终',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map);$('comparison').hidden=false;$('destination-title').textContent=name;
  $('scope-note').textContent=(stationIds?'本次到地铁站为止，进入高铁大厅或航站楼另计。':'包括学校所选方式接驳和下车后步行；地铁站出发点从站内起算。')+'路线如需跨东站两个站区，已计入出站步行时间。';
  const ids=[...enabled],ticket=requestSeq,controller=new AbortController();requestController=controller;
  let completed=0;const outcomes=new Map(),initialView={center:map.getCenter(),zoom:map.getZoom()};
- function progress(){if(ticket!==requestSeq)return;const rows=ids.filter(id=>byCampus.has(id)).map(id=>outcomes.get(id)??{origin_id:id,total_seconds:stationIds&&byCampus.get(id).ready?campusTime(byCampus.get(id),{member_ids:stationIds}).seconds:null,preview:true});const all=completed===ids.length;const valid=rows.filter(r=>r.total_seconds!=null&&!r.preview);showResults({results:rows,complete:all&&valid.length===ids.length,longest_seconds:valid.length?Math.max(...valid.map(r=>r.total_seconds)):null,spread_seconds:valid.length?Math.max(...valid.map(r=>r.total_seconds))-Math.min(...valid.map(r=>r.total_seconds)):null});if(!all)$('comparison-summary').textContent='正在查询 · 已完成 '+completed+' / '+ids.length+' 个出发点';$('status').textContent=all?'已比较 '+ids.length+' 个出发点 · 颜色与编号对应起点 · 点击路线可聚焦':'正在查询各出发点 · 路线逐条显示…';if(all){lastQueryState=valid.length===ids.length?'complete':'partial';if(map.getZoom()===initialView.zoom&&map.getCenter().equals(initialView.center))fitJourney(routeFocus);}}
+ function progress(){if(ticket!==requestSeq)return;const rows=ids.filter(id=>byCampus.has(id)).map(id=>outcomes.get(id)??{origin_id:id,total_seconds:stationIds&&byCampus.get(id).ready?campusTime(byCampus.get(id),{member_ids:stationIds}).seconds:null,preview:true});const all=completed===ids.length;const valid=rows.filter(r=>r.total_seconds!=null&&!r.preview);showResults({results:rows,complete:all&&valid.length===ids.length,longest_seconds:valid.length?Math.max(...valid.map(r=>r.total_seconds)):null,spread_seconds:valid.length?Math.max(...valid.map(r=>r.total_seconds))-Math.min(...valid.map(r=>r.total_seconds)):null});if(!all)$('comparison-summary').textContent='正在查询 · 已完成 '+completed+' / '+ids.length+' 个出发点';$('status').textContent=all?'已比较 '+ids.length+' 个出发点 · 颜色与编号对应起点 · 点击路线可聚焦':'正在查询各出发点 · 路线逐条显示…';if(all){lastQueryState=valid.length===ids.length?'complete':'partial';window.bindRouteAlternatives?.();if(map.getZoom()===initialView.zoom&&map.getCenter().equals(initialView.center))fitJourney(routeFocus);}}
  progress();updateLabels();if(location.protocol==='file:'){$('comparison-summary').textContent='完整路线及自定义出发点需使用本机在线地图。';lastQueryState='offline';return;}
- let cursor=0;async function worker(){while(cursor<ids.length&&ticket===requestSeq){const id=ids[cursor++],c=byCampus.get(id);if(!c)continue;try{const body={origin:c.descriptor,...(stationIds?{station_ids:stationIds}:{lon:latlng.lng,lat:latlng.lat})};const data=await postMap('/api/query',body,controller.signal);if(ticket!==requestSeq)return;outcomes.set(id,data.results[0]);}catch(e){if(ticket!==requestSeq)return;outcomes.set(id,{origin_id:id,total_seconds:null,error:e.name==='AbortError'?'该出发点查询超时，请重试':e.message});}completed++;progress();}}
+ let cursor=0;async function worker(){while(cursor<ids.length&&ticket===requestSeq){const id=ids[cursor++],c=byCampus.get(id);if(!c)continue;try{const body={origin:c.descriptor,preferences:window.getRoutePreferences?.()??{},...(stationIds?{station_ids:stationIds}:{lon:latlng.lng,lat:latlng.lat})};const data=await postMap('/api/query',body,controller.signal);if(ticket!==requestSeq)return;outcomes.set(id,data.results[0]);}catch(e){if(ticket!==requestSeq)return;outcomes.set(id,{origin_id:id,total_seconds:null,error:e.name==='AbortError'?'该出发点查询超时，请重试':e.message});}completed++;progress();}}
  await Promise.all(Array.from({length:Math.min(4,ids.length)},()=>worker()));if(ticket===requestSeq){requestController=null;if(lastQueryState==='partial'){const b=document.createElement('button');b.className='retry';b.textContent='重新查询';b.onclick=()=>queryPoint(latlng,stationIds,name);$('comparison-results').append(b);}}
 }
-$('comparison-close').onclick=()=>{clearQuery();lastTarget=null;lastResults=[];selected=null;window.setDestinationUI?.(null);$('comparison').hidden=true;lastQueryState='idle';$('status').textContent='搜索地铁站或点击地图，比较到达时间';updateLabels();};
+$('comparison-close').onclick=()=>{clearQuery();lastTarget=null;lastResults=[];selected=null;window.setDestinationUI?.(null);window.syncDestinationPreferences?.();$('comparison').hidden=true;lastQueryState='idle';$('status').textContent='搜索地铁站或点击地图，比较到达时间';updateLabels();};
 map.on('click',e=>queryPoint(e.latlng));
 function level(){return map.getZoom()<transferZoom?0:map.getZoom()<localZoom?1:2}
 function homeZoom(){const center=map.project([currentOrigin().lat,currentOrigin().lon],0),size=map.getSize();let dx=0,dy=0;for(const p of [...D.hubs,...campuses.filter(c=>enabled.has(c.id))]){const q=map.project([p.lat,p.lon],0);dx=Math.max(dx,Math.abs(q.x-center.x));dy=Math.max(dy,Math.abs(q.y-center.y))}return Math.max(7,Math.min(11.25,Math.floor(Math.log2(Math.min(Math.max(40,size.x/2-(size.x<=650?35:95))/Math.max(dx,.001),Math.max(70,size.y/2-140)/Math.max(dy,.001)))*4)/4))}
@@ -553,7 +554,7 @@ function updateLabels(){
  // keeping them in its stacking context, including after resize and auto-pan.
  for(const layer of [$('labels'),mapHud]){L.DomUtil.setPosition(layer,map.containerPointToLayerPoint([0,0]));layer.style.width=size.x+'px';layer.style.height=size.y+'px';}
  syncGateDetails(z);syncStationDisplays();for(const h of D.hubs){const marker=hubMarkers.get(h.name),show=z<railDisplay.splitZoom&&!hubHasOrigin(h);if(show&&!map.hasLayer(marker))marker.addTo(map);if(!show&&map.hasLayer(marker))map.removeLayer(marker);}
- $('labels').style.setProperty('--origin-font',(10+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--hub-font',(11+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--station-font',(9+3*scale).toFixed(1)+'px');
+ $('labels').style.setProperty('--origin-font',(12+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--hub-font',(13+4*scale).toFixed(1)+'px');$('labels').style.setProperty('--station-font',(11+3*scale).toFixed(1)+'px');
  for(const [layer,on] of [[transferLayer,current>=1],[localLayer,current>=2]]){if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)}
  $('mode').textContent=z>=gateZoom?'校门细节 · 点地图查询到达时间':['交通枢纽和出发点 · 放大显示换乘站','换乘站 · 再放大显示普通站','全部地铁站 · 再放大显示校门'][current];
  $('mode').style.bottom=(size.y-$('legend').offsetTop+8)+'px';

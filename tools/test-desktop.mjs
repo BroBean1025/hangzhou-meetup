@@ -23,7 +23,7 @@ try{
   const fixturesPath=path.join(out,'route-responses.json');
   let fixtures={};try{fixtures=JSON.parse(await fs.readFile(fixturesPath,'utf8'));}catch{}
   if(Object.keys(fixtures).length)await page.route('**/api/query',async route=>{
-    const body=route.request().postDataJSON(),fixture=fixtures[JSON.stringify(body)];
+    const body=route.request().postDataJSON();delete body.preferences;const fixture=fixtures[JSON.stringify(body)];
     if(fixture)return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(fixture)});
     return route.continue();
   });
