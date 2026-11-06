@@ -11,8 +11,8 @@ const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8'
 
 // Desktop and CLI share the same service; importing this module never opens a port.
 export function createMapServer({env=process.env,root=fileURLToPath(new URL('./public/',import.meta.url))}={}){
-root=path.resolve(root);
 const staticCache=new Map();
+let cachedRoot;
 return http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://'+(req.headers.host||'localhost'));
@@ -28,8 +28,9 @@ return http.createServer(async(req,res)=>{
     }
     if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end();return;}
     const relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname).replace(/^\/+/, '');
-    const file=path.resolve(root,relative);
-    if(!file.startsWith(root+path.sep)||!['index.html'].includes(relative)&&!relative.startsWith('assets/')){res.writeHead(404);res.end('Not found');return;}
+    const activeRoot=path.resolve(typeof root==='function'?root():root),file=path.resolve(activeRoot,relative);
+    if(activeRoot!==cachedRoot){staticCache.clear();cachedRoot=activeRoot;}
+    if(!file.startsWith(activeRoot+path.sep)||!['index.html'].includes(relative)&&!relative.startsWith('assets/')){res.writeHead(404);res.end('Not found');return;}
     let asset=staticCache.get(file);if(!asset){const raw=await readFile(file);const compressed=/\.(html|css|js)$/.test(file)?gzipSync(raw):null;asset={raw,compressed};staticCache.set(file,asset);}
     const zipped=asset.compressed&&/\bgzip\b/.test(req.headers['accept-encoding']||'');
     res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Cache-Control':relative==='index.html'?'no-cache':'public, max-age=31536000, immutable','Vary':'Accept-Encoding','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",...(zipped?{'Content-Encoding':'gzip'}:{})});

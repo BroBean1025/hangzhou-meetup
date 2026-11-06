@@ -1,4 +1,4 @@
-import {app,BrowserWindow,Menu,ipcMain,dialog,shell,screen,session} from 'electron';
+import {app,BrowserWindow,Menu,ipcMain,dialog,shell,screen,session,net} from 'electron';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -6,6 +6,7 @@ import {createMapServer} from '../core/server.mjs';
 import {configuredKey} from '../core/lib/key-config.mjs';
 import electronUpdater from 'electron-updater';
 import {UpdateController,RELEASES_URL} from './update-controller.mjs';
+import {HotUpdates} from './hot-updates.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const testing=process.env.MEETUP_TEST==='1';
@@ -13,7 +14,7 @@ app.setName('杭城同行');
 app.setAppUserModelId('com.hangzhou.meetup');
 app.setPath('userData',process.env.MEETUP_USER_DATA||path.join(app.getPath('appData'),'HangzhouMeetUp'));
 const profile=app.getPath('userData'),settingsPath=path.join(profile,'settings.json');
-let settings={},mainWindow,server,origin,updates;
+let settings={},mainWindow,server,origin,updates,hot;
 const runtimeEnv={};
 let writeQueue=Promise.resolve();
 function saveSettings(){
@@ -27,11 +28,26 @@ function settingsDialog(){mainWindow?.webContents.send('desktop:settings');}
 function updateDialog(){mainWindow?.webContents.send('desktop:show-updates');}
 function dailyUpdateCheck(){if(!testing)updates?.check().catch(()=>{});}
 async function startServer(port){
-  const candidate=createMapServer({env:runtimeEnv});
+  const candidate=createMapServer({env:runtimeEnv,root:()=>hot.root});
   await new Promise((resolve,reject)=>{candidate.once('error',reject);candidate.listen(port,'127.0.0.1',resolve);});
   return candidate;
 }
-function createWindow(){
+async function reloadVerified(){
+  const wc=mainWindow.webContents;let failed=false;
+  const failedResource=details=>{if(details.level==='error')failed=true;};
+  wc.on('console-message',failedResource);
+  try{
+    await wc.loadURL(origin);
+    const deadline=Date.now()+15000;
+    while(Date.now()<deadline){
+      if(failed)throw Error('UI initialization error');
+      try{if(await wc.executeJavaScript("!!document.querySelector('.leaflet-pane') && !!document.querySelector('#desktop-updates') && typeof map !== 'undefined' && map.getSize().x > 0"))return;}catch{}
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw Error('UI initialization timeout');
+  }finally{wc.removeListener('console-message',failedResource);}
+}
+async function createWindow(){
   const work=screen.getPrimaryDisplay().workArea;
   const previous=settings.window??{};
   const width=Math.min(work.width,Math.max(480,previous.width||Math.round(Math.min(1440,work.width*.93))));
@@ -55,7 +71,7 @@ function createWindow(){
   });
   mainWindow.on('closed',()=>{mainWindow=null;});
   mainWindow.on('focus',dailyUpdateCheck);
-  mainWindow.loadURL(origin).catch(error=>{console.error('Window load failed:',error.message);if(!testing)dialog.showErrorBox('地图加载失败',error.message);});
+  try{await reloadVerified();}catch(error){if(hot.active)await hot.reset();else throw error;}
 }
 
 if(!app.requestSingleInstanceLock())app.quit();
@@ -66,6 +82,10 @@ else{
     try{settings=JSON.parse(await readFile(settingsPath,'utf8'));}catch{}
     if(!app.isPackaged){try{process.loadEnvFile(path.join(here,'../.env'));}catch{}}
     runtimeEnv.AMAP_WEB_SERVICE_KEY=configuredKey(settings.amapKey)||configuredKey(process.env.AMAP_WEB_SERVICE_KEY);
+    let runtime;try{runtime=JSON.parse(await readFile(path.join(here,'runtime.json'),'utf8'));}catch{}
+    if(app.isPackaged&&(!runtime||runtime.version!==app.getVersion()||!/^[a-f0-9]{64}$/.test(runtime.fingerprint)))throw Error('桌面运行信息缺失，请重新安装。');
+    hot=new HotUpdates({directory:path.join(profile,'ui-updates'),bundledRoot:path.join(here,'../core/public'),version:app.getVersion(),fingerprint:runtime?.fingerprint,fetch:(url,options)=>net.fetch(url,options),reload:reloadVerified});
+    await hot.initialize();
     // Reuse the origin so browser preferences survive launches; recover if the port is occupied.
     try{server=await startServer(Number.isInteger(settings.port)?settings.port:17823);}catch(error){if(error.code!=='EADDRINUSE')throw error;server=await startServer(0);}
     settings.port=server.address().port;origin='http://127.0.0.1:'+settings.port;
@@ -75,7 +95,7 @@ else{
     const {autoUpdater}=electronUpdater;
     autoUpdater.logger={info(){},warn(){},error(){},debug(){}};
     updates=new UpdateController({
-      updater:autoUpdater,version:app.getVersion(),enabled:app.isPackaged,
+      updater:autoUpdater,version:hot.currentVersion,shellVersion:app.getVersion(),hot,enabled:app.isPackaged,
       portable:!!process.env.PORTABLE_EXECUTABLE_FILE,
       read:()=>settings.updates??{},
       write:async patch=>{settings.updates={...settings.updates,...patch};await saveSettings();},
@@ -90,6 +110,7 @@ else{
       'desktop:check-updates':()=>updates.check({manual:true}),
       'desktop:download-update':()=>updates.download(),
       'desktop:install-update':()=>updates.install(),
+      'desktop:reset-ui':()=>updates.resetHot(),
       'desktop:release-page':()=>openExternal(RELEASES_URL)
     }))ipcMain.handle(channel,(event)=>{if(!trusted(event))throw Error('不支持此请求');return handler();});
     ipcMain.handle('desktop:status',event=>{
@@ -111,9 +132,10 @@ else{
       {label:'应用',submenu:[{label:'高德服务设置…',click:settingsDialog},{type:'separator'},{label:'退出',role:'quit'}]},
       {label:'编辑',submenu:[{label:'撤销',role:'undo'},{label:'重做',role:'redo'},{type:'separator'},{label:'剪切',role:'cut'},{label:'复制',role:'copy'},{label:'粘贴',role:'paste'},{label:'全选',role:'selectAll'}]},
       {label:'视图',submenu:[{label:'刷新地图',role:'reload'},{type:'separator'},{label:'放大界面',role:'zoomIn'},{label:'缩小界面',role:'zoomOut'},{label:'恢复默认大小',role:'resetZoom'},{type:'separator'},{label:'全屏',role:'togglefullscreen'}]},
-      {label:'帮助',submenu:[{label:'检查更新…',click:()=>{updateDialog();updates.check({manual:true}).catch(()=>{});}},{label:'GitHub 发布页面',click:()=>openExternal(RELEASES_URL)},{type:'separator'},{label:'关于杭城同行',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'杭城同行',message:'杭城同行 · Hangzhou MeetUp',detail:`桌面版 ${app.getVersion()}\n地图资源在本机；路线与接驳查询需要联网。\n每天首次打开时自动检查 GitHub 更新。\nCtrl + / − 调整界面大小，Ctrl + 0 恢复，F11 全屏。\n按 Alt 显示菜单。`})}]}
+      {label:'帮助',submenu:[{label:'检查更新…',click:()=>{updateDialog();updates.check({manual:true}).catch(()=>{});}},{label:'恢复随程序安装的界面',click:()=>updates.resetHot()},{label:'GitHub 发布页面',click:()=>openExternal(RELEASES_URL)},{type:'separator'},{label:'关于杭城同行',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'杭城同行',message:'杭城同行 · Hangzhou MeetUp',detail:`桌面外壳 ${app.getVersion()} · 界面 ${hot.currentVersion}\n地图资源在本机；路线与接驳查询需要联网。\n每天首次打开时自动检查 GitHub 更新。\nCtrl + / − 调整界面大小，Ctrl + 0 恢复，F11 全屏。\n按 Alt 显示菜单。`})}]}
     ]));
-    createWindow();
+    await createWindow();
+    if(updates.version!==hot.currentVersion){updates.version=hot.currentVersion;updates.set({currentVersion:hot.currentVersion,phase:'idle',availableVersion:null,message:'上次界面补丁未正常启动，已恢复内置界面。'});}
     if(!testing)setTimeout(dailyUpdateCheck,2500).unref();
   }).catch(error=>{console.error('Startup failed:',error);if(!testing)dialog.showErrorBox('杭城同行启动失败',error.message);app.exit(1);});
   app.on('window-all-closed',()=>app.quit());

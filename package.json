@@ -1,6 +1,6 @@
 {
   "name": "hangzhou-meetup",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Hangzhou MeetUp · 杭城同行：多校区、地铁站出发的通勤与共同出行地图",
   "type": "module",
@@ -17,7 +17,8 @@
     "check:release": "node tools/check-release.mjs",
     "pack:release": "node tools/package.mjs",
     "desktop": "electron .",
-    "dist:win": "node tools/build.mjs && electron-builder --win nsis portable --x64 --publish never",
+    "prepare:desktop": "node tools/prepare-hot-update.mjs",
+    "dist:win": "node tools/build.mjs && node tools/prepare-hot-update.mjs && electron-builder --win nsis portable --x64 --publish never",
     "test:desktop": "node tools/test-desktop.mjs",
     "check:desktop": "node tools/check-desktop-package.mjs"
   },
@@ -42,6 +43,7 @@
       "core/server.mjs",
       "desktop/*.mjs",
       "desktop/*.cjs",
+      "desktop/runtime.json",
       "desktop/icon.ico",
       "package.json",
       "LICENSE",

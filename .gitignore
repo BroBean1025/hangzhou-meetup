@@ -25,6 +25,7 @@ dist/
 coverage/
 releases/
 desktop-output/
+desktop/runtime.json
 test-artifacts/
 *.zip
 *.tar.gz

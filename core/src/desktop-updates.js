@@ -7,7 +7,7 @@
   const $=selector=>dialog.querySelector(selector);
   function render(state){
     const busy=['checking','downloading','installing'].includes(state.phase);
-    $('.update-version').textContent='当前版本 '+state.currentVersion+(state.availableVersion?' · 新版本 '+state.availableVersion:'');
+    $('.update-version').textContent='当前界面 '+state.currentVersion+' · 外壳 '+state.shellVersion+(state.availableVersion?' · 新版本 '+state.availableVersion:'');
     $('#update-message').textContent=state.message;
     $('#update-message').classList.toggle('update-error',state.phase==='error');
     $('#update-progress').hidden=state.phase!=='downloading';$('#update-progress').value=state.progress;
@@ -16,10 +16,11 @@
     $('.update-checked').textContent=date&&!Number.isNaN(date.getTime())?'上次成功检查：'+date.toLocaleString('zh-CN'):'尚未完成线上检查';
     $('#update-check').disabled=busy||state.phase==='downloaded';
     $('#update-download').hidden=!state.availableVersion||!['available','error'].includes(state.phase);$('#update-download').disabled=busy;
-    $('#update-download').textContent=state.portable?'下载新版免安装包':'下载更新';
+    $('#update-download').textContent=state.kind==='hot'?'下载界面补丁（'+(state.size/1024/1024).toFixed(1)+' MB）':state.portable?'下载新版免安装包':'下载完整更新';
+    $('#update-install').textContent=state.kind==='hot'?'应用补丁并刷新':'重启并安装';
     $('#update-install').hidden=state.phase!=='downloaded';
     $('#update-notes').hidden=!state.releaseNotes;$('#update-notes pre').textContent=state.releaseNotes||'';
-    $('.update-mode').textContent=state.portable?'免安装版：下载完成后关闭程序，替换旧 EXE。':'安装版：下载后点击“重启并安装”；高德 Key、出发点和界面设置会保留。';
+    $('.update-mode').textContent=state.kind==='hot'?'热更新：仅刷新界面，当前路线会重新加载；高德 Key 和已保存的偏好保留。加载失败会恢复上一版。':state.portable?'冷更新：下载新版免安装包，关闭程序后替换 EXE。界面小补丁可在应用内热更新。':'冷更新：下载完整程序，重启安装后生效；高德 Key、出发点和界面设置保留。界面小补丁无需重启程序。';
     const available=['available','downloaded','installing'].includes(state.phase)||state.phase==='error'&&state.availableVersion;
     button.classList.toggle('has-update',!!available);button.textContent=available?'有更新':'更新';button.setAttribute('aria-label',available?'发现新版本，打开应用更新':'检查应用更新');
   }

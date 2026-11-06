@@ -3,6 +3,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      update_mode:
+        description: '更新策略（hot 仍需通过兼容性与改动范围检查）'
+        type: choice
+        default: auto
+        options: [auto, cold, hot]
 permissions:
   contents: write
 concurrency:
@@ -17,6 +23,8 @@ jobs:
       GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -30,12 +38,30 @@ jobs:
         id: version
         run: node tools/prepare-desktop-release.mjs
       - run: pnpm run build
+      - name: Classify changes and prepare a compatible UI bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPDATE_MODE: ${{ inputs.update_mode || 'auto' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $false
+          $base = gh release view --json tagName --jq .tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $env:UPDATE_BASE = $base.Trim()
+            gh release download $env:UPDATE_BASE --pattern hot-update.json --dir test-artifacts/previous-update --clobber 2>$null
+            if ($LASTEXITCODE -eq 0) { $env:UPDATE_PREVIOUS = 'test-artifacts/previous-update/hot-update.json' }
+          }
+          node tools/prepare-hot-update.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Update preparation failed' }
       - run: pnpm test
       - run: pnpm run check:release
       - name: Build installer, portable EXE and update manifest
         run: pnpm exec electron-builder --win nsis portable --x64 --publish never
       - name: Verify update manifest and package
         run: node tools/check-desktop-package.mjs
+      - name: Verify hot activation and rollback in packaged Electron
+        run: node tools/test-hot-desktop.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: windows-desktop-${{ steps.version.outputs.version }}
@@ -43,6 +69,8 @@ jobs:
             desktop-output/*.exe
             desktop-output/*.blockmap
             desktop-output/latest.yml
+            desktop-output/hot-update.json
+            desktop-output/*.json.gz
           retention-days: 7
       - name: Publish a complete GitHub Release
         env:
@@ -59,12 +87,14 @@ jobs:
             if (-not $release.isDraft) { Write-Output 'This version is already published; preserving its assets.'; exit 0 }
             if ($release.targetCommitish -ne $env:GITHUB_SHA) { throw 'Existing draft belongs to a different commit' }
           } else {
-            $notes = "杭城同行 Windows 桌面版 $env:RELEASE_VERSION`n`n构建自提交 $env:GITHUB_SHA。`n安装版支持每日首次打开自动检查，以及程序内手动下载、重启安装。`n高德 Key 与个人设置保留在本机，不包含在发布文件中。`n免安装版可在程序内检查并下载新版 EXE。"
+            $update = Get-Content desktop-output/hot-update.json -Raw | ConvertFrom-Json
+            $mode = if ($update.mode -eq 'hot') { '兼容的界面小补丁可热更新，应用补丁后刷新界面。' } else { '本次包含完整程序更新，安装版需重启安装；免安装版需替换 EXE。' }
+            $notes = "杭城同行 Windows 桌面版 $env:RELEASE_VERSION`n`n构建自提交 $env:GITHUB_SHA。`n$mode`n每天首次打开自动检查，也可在程序内手动检查。`n高德 Key 与个人设置保留在本机，不包含在发布文件中。`n首次使用请选择 Setup（安装版）或 Portable（免安装版）EXE；补丁文件由应用自动处理。"
             $notes | Set-Content -LiteralPath release-notes.txt -Encoding utf8
             gh release create $env:RELEASE_TAG --draft --target $env:GITHUB_SHA --title "杭城同行 $env:RELEASE_VERSION" --notes-file release-notes.txt
             if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
           }
-          $assets = @(Get-ChildItem desktop-output -File | Where-Object { $_.Name -match '\.(exe|blockmap)$' -or $_.Name -eq 'latest.yml' } | ForEach-Object FullName)
+          $assets = @(Get-ChildItem desktop-output -File | Where-Object { $_.Name -match '\.(exe|blockmap|json\.gz)$' -or $_.Name -in @('latest.yml','hot-update.json') } | ForEach-Object FullName)
           gh release upload $env:RELEASE_TAG @assets --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed; draft remains unpublished' }
           gh release edit $env:RELEASE_TAG --draft=false --latest

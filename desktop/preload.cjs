@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('desktop',{
   checkUpdates:()=>ipcRenderer.invoke('desktop:check-updates'),
   downloadUpdate:()=>ipcRenderer.invoke('desktop:download-update'),
   installUpdate:()=>ipcRenderer.invoke('desktop:install-update'),
+  resetUI:()=>ipcRenderer.invoke('desktop:reset-ui'),
   releasePage:()=>ipcRenderer.invoke('desktop:release-page'),
   onUpdateState:callback=>ipcRenderer.on('desktop:update-state',(_event,state)=>callback(state)),
   onShowUpdates:callback=>ipcRenderer.on('desktop:show-updates',()=>callback())
