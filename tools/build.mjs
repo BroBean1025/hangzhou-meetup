@@ -3,7 +3,7 @@ import {readFile,writeFile,mkdir,readdir,unlink} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-const root=fileURLToPath(new URL('../',import.meta.url)),out=path.join(root,'public/assets');
+const root=fileURLToPath(new URL('../core/',import.meta.url)),out=path.join(root,'public/assets');
 await mkdir(out,{recursive:true});
 const keep=new Set(),refs=new Map();
 async function asset(label,raw,ext){

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {RegionalRouter,mergeCatalog} from '../lib/regional-network.mjs';
+import {RegionalRouter,mergeCatalog} from '../../core/lib/regional-network.mjs';
 const graph={nodes:[{id:'a1',station_id:'a',line_id:'core'},{id:'b1',station_id:'b',line_id:'core'}],edges:[{from:'a1',to:'b1',kind:'ride',line_id:'core',seconds:120}]};
 const regional={stations:[{id:'b',lines:['regional']}],lines:[],nodes:[{id:'b2',station_id:'b',line_id:'regional'},{id:'c2',station_id:'c',line_id:'regional'}],edges:[{from:'b1',to:'b2',kind:'transfer',line_id:'regional',seconds:39},{from:'b2',to:'b1',kind:'transfer',line_id:'core',seconds:49},{from:'b2',to:'c2',kind:'ride',line_id:'regional',seconds:600},{from:'c2',to:'b2',kind:'ride',line_id:'regional',seconds:540}],timing_note:'fixture'};
 const segments=[{from_stop_id:'a1',to_stop_id:'b1',direction:'both'}];

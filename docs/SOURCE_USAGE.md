@@ -1,12 +1,12 @@
 # 运行核心源码（浏览器版）
 
-这是原来的独立 Node.js 运行方式，支持 Windows、macOS 和 Linux。地图、校门接驳、路线比较、途中汇合与到达时间安排均可在浏览器使用。[返回首页与功能演示](../README.md#功能演示)
+这是原来的独立 Node.js 运行方式，支持 Windows、macOS 和 Linux。地图、校门接驳、路线比较、途中汇合与到达时间安排均可在浏览器使用。[返回首页](../README.md) · [功能演示](FEATURES.md)
 
 ## 下载与启动
 
 1. 安装 [Node.js](https://nodejs.org/) **22.13 或更新版本**。
 2. [下载源码 ZIP](https://github.com/BroBean1025/hangzhou-meetup/archive/refs/heads/main.zip) 并解压；也可以在仓库中点 **Code → Download ZIP**，或使用 Git 克隆仓库。
-3. 在包含 `server.mjs` 和 `package.json` 的目录打开终端。
+3. 在仓库根目录（包含 `package.json` 和 `core/`）打开终端。
 
 ```sh
 npm run setup
@@ -29,7 +29,7 @@ npm start
 
 浏览器打开 **http://localhost:8080**，保持终端开启。Windows 用户也可以双击 `启动地图.cmd`，首次运行会创建并打开配置文件。退出时在终端按 `Ctrl+C`。
 
-核心服务只使用 Node.js 内置模块，运行它无需 `npm install`，也无需 Electron、ChatGPT、Codex 或 Python。源码 ZIP 是完整仓库，包含可选的 `desktop/` 目录；浏览器运行方式不会加载桌面外壳或更新模块。`public/` 已包含构建好的网页，直接启动即可。
+核心服务只使用 Node.js 内置模块，运行它无需 `npm install`，也无需 Electron、ChatGPT、Codex 或 Python。源码 ZIP 是完整仓库，包含可选的 `desktop/` 目录；浏览器运行方式不会加载桌面外壳或更新模块。`core/public/` 已包含构建好的网页，直接启动即可。
 
 `doctor` 检查所需文件和 Key 是否填入，不会显示 Key 或消耗高德接口额度，也不验证账户权限与余额。修改 `.env` 后需要重启服务；若系统已经有同名环境变量，Node 会优先使用系统环境变量。
 
@@ -45,9 +45,9 @@ npm start
 
 ## 修改与更新源码
 
-- 前端源码在 `src/`，后端查询逻辑在 `lib/`，HTTP 入口是 `server.mjs`。修改前端或地图数据后，运行 `npm run build` 并重启服务。
+- 前端源码在 `core/src/`，后端查询逻辑在 `core/lib/`，HTTP 入口是 `core/server.mjs`。修改前端或地图数据后，运行 `npm run build` 并重启服务。
 - 更新时先停止服务，再更新代码。使用 Git 的用户可在没有未提交冲突时运行 `git pull`；使用 ZIP 的用户可解压新版到新目录，在本机迁移自己的 `.env` 和自定义数据后启动。
 - 浏览器版由你自行更新源码，程序内的桌面更新按钮只用于 EXE 版本。
-- 开发依赖、完整测试和目录结构见 [开发与维护](../README.md#开发与维护)。添加学校见 [学校与校区扩展指南](EXTENDING_CAMPUSES.md)。
+- 开发依赖、完整测试和目录结构见 [开发与维护](DEVELOPMENT.md)。添加学校见 [学校与校区扩展指南](EXTENDING_CAMPUSES.md)。
 
-手机访问、Docker 和服务器部署方式见 [配置指南](CONFIGURATION.md) 与 [Docker 使用说明](../README.md#用-docker-运行)。
+手机访问、Docker 和服务器部署方式见 [配置指南](CONFIGURATION.md) 与 [Docker 使用说明](DEVELOPMENT.md#用-docker-运行)。

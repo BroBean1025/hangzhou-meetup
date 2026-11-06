@@ -9,7 +9,7 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const archive='desktop-output/win-unpacked/resources/app.asar';
 const entries=asar.listPackage(archive);
 if(entries.some(name=>/(?:^|[\\/])(?:\.env(?:\.|$)|test-artifacts)/.test(name)))throw Error('Private configuration in packaged app');
-for(const name of ['desktop/main.mjs','desktop/preload.cjs','desktop/update-controller.mjs'])if(!asar.extractFile(archive,name).equals(fs.readFileSync(name)))throw Error('Packaged source mismatch: '+name);
+for(const name of ['desktop/main.mjs','desktop/preload.cjs','desktop/update-controller.mjs','core/server.mjs','core/public/index.html','docs/legal/licenses/Leaflet-LICENSE.txt'])if(!asar.extractFile(archive,path.normalize(name)).equals(fs.readFileSync(name)))throw Error('Packaged source mismatch: '+name);
 const feed=fs.readFileSync('desktop-output/win-unpacked/resources/app-update.yml','utf8');
 if(!feed.includes('owner: BroBean1025')||!feed.includes('repo: hangzhou-meetup'))throw Error('Unexpected update repository');
 const manifest=fs.readFileSync('desktop-output/latest.yml','utf8'),name=`HangzhouMeetUp-Setup-${pkg.version}.exe`;

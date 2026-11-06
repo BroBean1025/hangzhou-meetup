@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import '../src/trip-time.js';
-import {stationDepartures} from '../lib/route-timing.mjs';
-import {RegionalRouter} from '../lib/regional-network.mjs';
+import '../../core/src/trip-time.js';
+import {stationDepartures} from '../../core/lib/route-timing.mjs';
+import {RegionalRouter} from '../../core/lib/regional-network.mjs';
 const T=globalThis.MeetUpTime,minute=60000,target=T.parseLocal('2026-11-07T18:00'),now=target-4*3600000;
 const candidate=(sid,ids)=>({sid,next:sid+'next',line:'L',members:ids.map(id=>({id}))});
 const route=(id,total,positions={})=>({origin_id:id,total_seconds:total,station_departures:Object.entries(positions).map(([sid,seconds])=>({station_id:sid,next_station_id:sid+'next',line_id:'L',elapsed_seconds:seconds}))});

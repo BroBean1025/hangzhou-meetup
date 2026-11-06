@@ -8,17 +8,17 @@ if errorlevel 1 (
   exit /b 1
 )
 if not exist ".env" (
-  node scripts/setup.mjs
+  node tools/setup.mjs
   echo 请在打开的文件中填写高德 Web 服务 Key，保存关闭后再次运行此文件。
   notepad .env
   pause
   exit /b 0
 )
-node --env-file=.env scripts/doctor.mjs
+node --env-file=.env tools/doctor.mjs
 if errorlevel 1 (
   pause
   exit /b 1
 )
 echo 浏览器打开 http://localhost:8080；保持本窗口开启。
-node --env-file=.env server.mjs
+node --env-file=.env core/server.mjs
 pause

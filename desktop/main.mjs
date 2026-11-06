@@ -2,8 +2,8 @@ import {app,BrowserWindow,Menu,ipcMain,dialog,shell,screen,session} from 'electr
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {createMapServer} from '../server.mjs';
-import {configuredKey} from '../lib/key-config.mjs';
+import {createMapServer} from '../core/server.mjs';
+import {configuredKey} from '../core/lib/key-config.mjs';
 import electronUpdater from 'electron-updater';
 import {UpdateController,RELEASES_URL} from './update-controller.mjs';
 

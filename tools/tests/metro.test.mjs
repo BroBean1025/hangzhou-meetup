@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {geometry,parseAccess,gcjToWgs,wgsToGcj,MetroService,handleApi} from '../lib/metro-service.mjs';
+import {geometry,parseAccess,gcjToWgs,wgsToGcj,MetroService,handleApi} from '../../core/lib/metro-service.mjs';
 
 test('coordinate round trip is reversible within sub-meter tolerance',()=>{
   const point=[120.125521,30.261332],w=gcjToWgs(...point),r=wgsToGcj(...w);

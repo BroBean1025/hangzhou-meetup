@@ -29,4 +29,4 @@ test-artifacts/
 *.zip
 *.tar.gz
 *.tgz
-# public/ is deliberately tracked: download and start without a build.
+# core/public/ is deliberately tracked: download and start without a build.

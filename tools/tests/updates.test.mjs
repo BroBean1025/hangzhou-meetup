@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
-import {UpdateController,localDay,updateMessage} from '../desktop/update-controller.mjs';
+import {UpdateController,localDay,updateMessage} from '../../desktop/update-controller.mjs';
 
 function fixture({saved={},version='0.2.0',portable=false,enabled=true}={}){
   const updater=new EventEmitter();let count=0,downloads=0,installed=0,prepared=0,opened='';

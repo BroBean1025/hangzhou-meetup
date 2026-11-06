@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {MetroService} from '../lib/metro-service.mjs';
+import {MetroService} from '../../core/lib/metro-service.mjs';
 
 const main='cn-hangzhou-east-railway-station',square=main+'-east-square';
 function fixture(){

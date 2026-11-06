@@ -1,11 +1,11 @@
 # 参与维护
 
-1. 开发及完整测试使用 Node.js 24 与 pnpm 11.25.0，先运行 `pnpm install --frozen-lockfile`。仅运行核心浏览器版无需安装依赖，见[源码使用说明](docs/SOURCE_USAGE.md)。
+1. 开发及完整测试使用 Node.js 24 与 pnpm 11.25.0，先运行 `pnpm install --frozen-lockfile`。仅运行核心浏览器版无需安装依赖，见[源码使用说明](../docs/SOURCE_USAGE.md)。
 2. `npm run setup`，在自己的 `.env` 中填写自己的高德 Web 服务 Key。
-3. 编辑 `src/` 或 `lib/`；前端修改后运行 `npm run build` 并重启服务。
+3. 编辑 `core/src/` 或 `core/lib/`；前端修改后运行 `npm run build` 并重启服务。
 4. 提交前运行 `npm test`、`npm run check:release`；界面修改同时检查电脑及手机布局。
 5. 不提交真实 Key、日志、用户偏好或未经允许再分发的第三方数据。
-6. 每次发布功能、修复或重要文档更新时，将日期、用户可见变化写在 `CHANGELOG.md` 顶部，并同步 README 顶部的“最近更新”区。主页按日期倒序保留最近 3 次的摘要，最新一次突出展示；完整历史保留在更新日志中。
+6. 更新日志按北京时间的自然日合并：同一天只保留一条，后续功能追加到当日条目。主要记录新增功能和显著的体验变化，不罗列小 bug 修复、内部重构或日常文档整理。同步 `docs/CHANGELOG.md` 和 README 的“最近更新”；首页按日期倒序保留最近 3 个日期的摘要。
 
 沿用 **Hangzhou MeetUp · 杭城同行** 名称。学校/校门各自建模；不将站间时间冒充完整门到门时间，不将静态规划称为实时，不伪造曲线或缺失步行，不重复计算东站跨站区时间。
 

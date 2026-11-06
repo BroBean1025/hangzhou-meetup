@@ -28,14 +28,14 @@ jobs:
       - run: pnpm exec install-electron
       - name: Assign a unique increasing desktop version
         id: version
-        run: node scripts/prepare-desktop-release.mjs
+        run: node tools/prepare-desktop-release.mjs
       - run: pnpm run build
       - run: pnpm test
       - run: pnpm run check:release
       - name: Build installer, portable EXE and update manifest
         run: pnpm exec electron-builder --win nsis portable --x64 --publish never
       - name: Verify update manifest and package
-        run: node scripts/check-desktop-package.mjs
+        run: node tools/check-desktop-package.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: windows-desktop-${{ steps.version.outputs.version }}

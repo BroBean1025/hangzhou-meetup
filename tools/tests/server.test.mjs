@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import {createMapServer} from '../server.mjs';
+import {createMapServer} from '../../core/server.mjs';
 
 test('desktop server serves built UI, keeps secrets private, rejects foreign sites and rebound hosts',async()=>{
   const key='a'.repeat(32),server=createMapServer({env:{AMAP_WEB_SERVICE_KEY:key}});

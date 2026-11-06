@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {directedConnectors,supplementTimes,connectPlans} from '../lib/walk-connectors.mjs';
-import {MetroService} from '../lib/metro-service.mjs';
+import {directedConnectors,supplementTimes,connectPlans} from '../../core/lib/walk-connectors.mjs';
+import {MetroService} from '../../core/lib/metro-service.mjs';
 const stations=new Map(['origin','a','b','target'].map(id=>[id,{id,name:id,location:{lon:120.2,lat:30.3}}]));
 const edge={id:'a-b',from_station_id:'a',to_station_id:'b',seconds:420,label:'跨站区步行',geometry:{crs:'wgs84',status:'complete',parts:[{mode:'walk',coordinates:[[120,30],[120.1,30.1]]}]}};
 const data=rows=>({weight:'seconds',stations:Object.entries(rows).map(([station_id,seconds])=>({station_id,seconds}))});

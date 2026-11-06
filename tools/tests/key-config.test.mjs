@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {configuredKey} from '../lib/key-config.mjs';
-import {handleApi} from '../lib/metro-service.mjs';
+import {configuredKey} from '../../core/lib/key-config.mjs';
+import {handleApi} from '../../core/lib/metro-service.mjs';
 
 test('blank and example keys are not presented as configured',()=>{
  for(const raw of [undefined,'','  ','replace_with_your_amap_web_service_key','请填写自己的Key'])assert.equal(configuredKey(raw),'');

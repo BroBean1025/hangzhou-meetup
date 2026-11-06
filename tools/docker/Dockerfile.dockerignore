@@ -1,0 +1,9 @@
+**
+!core/
+!core/public/
+!core/public/**
+!core/config/
+!core/config/**
+!core/lib/
+!core/lib/**
+!core/server.mjs

@@ -1,8 +1,10 @@
 services:
   map:
-    build: .
+    build:
+      context: ../..
+      dockerfile: tools/docker/Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: ../../.env
     environment:
       HOST: 0.0.0.0
       PORT: 8080

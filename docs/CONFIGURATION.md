@@ -34,7 +34,7 @@ npm start
 若 PowerShell 阻止执行 `npm.ps1`，使用 `npm.cmd start` / `npm.cmd run setup`，或者直接：
 
 ```powershell
-node --env-file=.env server.mjs
+node --env-file=.env core/server.mjs
 ```
 
 ## macOS / Linux
@@ -42,10 +42,10 @@ node --env-file=.env server.mjs
 ```sh
 npm run setup
 # 使用你熟悉的编辑器填写 .env
-node --env-file=.env server.mjs
+node --env-file=.env core/server.mjs
 ```
 
-不建议把真实 Key 直接写进命令行：它可能进入终端历史。不要为配置 Key 修改 `src/`、`public/`、`config/settings.json` 或 Dockerfile。
+不建议把真实 Key 直接写进命令行：它可能进入终端历史。不要为配置 Key 修改 `core/src/`、`core/public/`、`core/config/settings.json` 或 Dockerfile。
 
 ## 手机访问
 
@@ -57,7 +57,7 @@ node --env-file=.env server.mjs
 
 ## 公网部署
 
-使用能运行 Node.js 22.13+ 或 Docker 的服务器。上传本项目，在服务器环境变量中配置 `AMAP_WEB_SERVICE_KEY`、`HOST=0.0.0.0`、`PORT`；使用 `node server.mjs` 启动。平台注入环境变量时不必上传 `.env`。
+使用能运行 Node.js 22.13+ 或 Docker 的服务器。上传本项目，在服务器环境变量中配置 `AMAP_WEB_SERVICE_KEY`、`HOST=0.0.0.0`、`PORT`；使用 `node core/server.mjs` 启动。平台注入环境变量时不必上传 `.env`。
 
 同一服务器的访客使用同一个 Key 的配额。现有服务有基本请求大小和频率限制，但没有用户账户、计费或完备的防滥用系统。面向陌生公众时，应在反向代理/托管平台配置 HTTPS、访问限制和监控。
 

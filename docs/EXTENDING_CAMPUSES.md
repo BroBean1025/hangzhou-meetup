@@ -10,7 +10,7 @@
 
 ## 2. 补齐后端配置
 
-编辑 `config/settings.json`，参照现有的一个校区：
+编辑 `core/config/settings.json`，参照现有的一个校区：
 
 - 在 `origins` 中为每个校门添加独立条目。键名保持唯一，`location` 填写 `lon`、`lat` 和 `crs: "gcj02"`；保留名称、来源和核实日期。
 - 在 `campuses` 中新增校区，填写唯一的 `id`、`name`、`short_name`、`campus_name`、`school_id`、`school_name`。`origin_key` 指向默认校门，`gate_options` 列出可选校门的 `key` 和 `label`。
@@ -20,15 +20,15 @@
 
 ## 3. 同步前端目录
 
-在 `data/map.json` 的 `campuses` 中添加对应校区，保持 `id`、学校分组和校门键名与后端一致。校区标记的 `lon`、`lat`，以及 `gate_options` 中各校门的坐标均使用 WGS84。
+在 `core/data/map.json` 的 `campuses` 中添加对应校区，保持 `id`、学校分组和校门键名与后端一致。校区标记的 `lon`、`lat`，以及 `gate_options` 中各校门的坐标均使用 WGS84。
 
 新增校区的 `times` 设为 `{}`，先将 `default_enabled` 设为 `false`，然后在网页里手动勾选，使用自己的 Key 查询实际结果。不要复制示例校区的时间、接驳提示或来源字段作为新校区的数据。
 
-校徽可不配置，将 `logo` 设为 `null` 即使用通用标记。如需添加自己的图片，按现有约定保存为未使用的 `data/school-4.png` 等编号文件，并把该校区的 `logo` 设为 `local-logo:school-4.png`。数字可换为其他未占用编号；图片的使用遵循其原有规则。
+校徽可不配置，将 `logo` 设为 `null` 即使用通用标记。如需添加自己的图片，按现有约定保存为未使用的 `core/data/school-4.png` 等编号文件，并把该校区的 `logo` 设为 `local-logo:school-4.png`。数字可换为其他未占用编号；图片的使用遵循其原有规则。
 
 ## 4. 按需添加校园边界
 
-在 `data/geography.json` 的 `features` 中加入真实的 Polygon 或 MultiPolygon，设置 `properties.kind` 为 `campus`、`properties.campus_id` 为新校区的 `id`。坐标使用 WGS84，保留来源信息。暂时没有可靠边界时可以不添加，校区标记与路线查询仍可使用。
+在 `core/data/geography.json` 的 `features` 中加入真实的 Polygon 或 MultiPolygon，设置 `properties.kind` 为 `campus`、`properties.campus_id` 为新校区的 `id`。坐标使用 WGS84，保留来源信息。暂时没有可靠边界时可以不添加，校区标记与路线查询仍可使用。
 
 ## 5. 构建并验证
 

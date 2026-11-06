@@ -22,4 +22,4 @@ SOFTWARE.
 
 Scope: this license covers original application code and documentation only.
 It does not relicense third-party libraries, data, logos or other third-party
-assets. See THIRD_PARTY_NOTICES.md for their separate terms and provenance.
+assets. See docs/legal/THIRD_PARTY_NOTICES.md for their separate terms and provenance.

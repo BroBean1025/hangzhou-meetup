@@ -1,6 +1,6 @@
 import {readFile,access} from 'node:fs/promises';
-import {configuredKey} from '../lib/key-config.mjs';
-const base=new URL('../',import.meta.url);
+import {configuredKey} from '../core/lib/key-config.mjs';
+const base=new URL('../core/',import.meta.url);
 const version=process.versions.node.split('.').map(Number);
 let ok=version[0]>22||version[0]===22&&version[1]>=13;
 console.log('Node.js '+process.versions.node+(ok?'：可用':'：需要 22.13 或更新版本'));

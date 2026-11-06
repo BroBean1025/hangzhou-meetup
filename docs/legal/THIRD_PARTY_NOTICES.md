@@ -6,12 +6,12 @@
 
 | 内容 | 本项目路径 | 来源与许可情况 |
 | --- | --- | --- |
-| Leaflet | `src/vendor/leaflet.*`、构建后的对应资源 | Leaflet，BSD-2-Clause；完整原始声明见 `licenses/Leaflet-LICENSE.txt` |
-| 杭州地铁目录、静态时间与网络 | `data/map.json` 中的目录/基础数据；运行时从 API 查询 | [OpenMetro](https://github.com/Naptie/openmetro)，上游仓库声明 MPL-2.0；上游许可证不能替代底层供应商可能存在的权利。未复制上游 API 实现代码 |
-| 底图与校园区域 | `data/geography.json` | © OpenStreetMap contributors，ODbL 1.0；构成公开派生数据库的内容应保持相应署名与同许可要求 |
-| 真实轨道轨迹、跨城规划模型 | `data/map.json` 的 segments、`config/regional-network.json` | 整理自高德规划/线路资料，属于第三方派生快照；不授予 MIT 数据许可 |
-| 校门接驳与跨站区步行资料 | `config/walking-snapshot.json`、`config/settings.json` 部分来源信息、前端估时快照 | 由高德规划及公开校区资料核实整理；不授予 MIT 数据许可 |
-| 校徽 | `data/school-*.png`、相应构建图片及截图中的标识 | 据项目作者说明，下载自浙江大学、浙江工业大学、西湖大学官网“文化标识”等相关栏目公开提供的资源；仅用于地点识别，不表示学校背书，权利归原权利人，不纳入 MIT 许可 |
+| Leaflet | `core/src/vendor/leaflet.*`、构建后的对应资源 | Leaflet，BSD-2-Clause；完整原始声明见 [Leaflet 许可](licenses/Leaflet-LICENSE.txt) |
+| 杭州地铁目录、静态时间与网络 | `core/data/map.json` 中的目录/基础数据；运行时从 API 查询 | [OpenMetro](https://github.com/Naptie/openmetro)，上游仓库声明 MPL-2.0；上游许可证不能替代底层供应商可能存在的权利。未复制上游 API 实现代码 |
+| 底图与校园区域 | `core/data/geography.json` | © OpenStreetMap contributors，ODbL 1.0；构成公开派生数据库的内容应保持相应署名与同许可要求 |
+| 真实轨道轨迹、跨城规划模型 | `core/data/map.json` 的 segments、`core/config/regional-network.json` | 整理自高德规划/线路资料，属于第三方派生快照；不授予 MIT 数据许可 |
+| 校门接驳与跨站区步行资料 | `core/config/walking-snapshot.json`、`core/config/settings.json` 部分来源信息、前端估时快照 | 由高德规划及公开校区资料核实整理；不授予 MIT 数据许可 |
+| 校徽 | `core/data/school-*.png`、相应构建图片及截图中的标识 | 据项目作者说明，下载自浙江大学、浙江工业大学、西湖大学官网“文化标识”等相关栏目公开提供的资源；仅用于地点识别，不表示学校背书，权利归原权利人，不纳入 MIT 许可 |
 | 页面截图 | `docs/screenshots/*.jpg`、`docs/desktop.png`、`docs/mobile.png` | 包含上述地图数据与标识，其第三方权属随之保留；README 演示图来自本项目实际界面 |
 
 地图页已经保留 OpenStreetMap 和 OpenMetro 署名。源码/数据快照与构建资源同时提供，方便追溯。地理坐标转换和格式整理不会自动消除原始数据的使用限制。
