@@ -28,8 +28,10 @@ test('service uses the same walking plan for reachability and final time breakdo
  const m=new MetroService('');m.stations=stations;m.lines=new Map([['line','线路']]);m.version='walk-unit-1';m.connectorConfig=[edge];
  m.rawTravelTimes=async from=>({...data(from==='origin'?{origin:0,a:100,b:1500,target:2000}:{b:0,target:200}),from_station_id:from});
  m.rawRoute=async(from,to)=>({total_seconds:from==='origin'?100:200,transfers:0,fare:2,legs:[{kind:'ride',seconds:from==='origin'?100:200,line_id:'line',station_ids:[from,to]}]});
+ m.railRouter=async()=>({timedLeg:leg=>leg});
  const r=await m.route('origin','target');assert.equal(r.total_seconds,720);assert.equal(r.legs[1].kind,'walk_transfer');
  const result=await m.metroResult({options:[{station:stations.get('origin'),walk:{mode:'station',seconds:0}}]},{seconds:720,metro_seconds:720,access_seconds:0,via_id:'origin'},stations.get('target'),{seconds:120});
  assert.equal(result.total_seconds,840);assert.equal(result.transfer_seconds,420);assert.equal(result.cross_station_seconds,420);assert.equal(result.ride_seconds,300);
  assert.equal(result.access_seconds+result.ride_seconds+result.transfer_seconds+result.egress_seconds,result.total_seconds);
+ assert.deepEqual(result.station_departures.map(s=>[s.station_id,s.elapsed_seconds]),[['origin',0],['b',520]]);
 });

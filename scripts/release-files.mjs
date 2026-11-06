@@ -2,7 +2,7 @@ import {readdir,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 export const root=fileURLToPath(new URL('../',import.meta.url));
-const top=new Set(['package.json','README.md','LICENSE','DISCLAIMER.md','THIRD_PARTY_NOTICES.md','SECURITY.md','CONTRIBUTING.md','.env.example','.gitignore','.gitattributes','.dockerignore','Dockerfile','compose.yaml','server.mjs','启动地图.cmd']);
+const top=new Set(['package.json','README.md','CHANGELOG.md','LICENSE','DISCLAIMER.md','THIRD_PARTY_NOTICES.md','SECURITY.md','CONTRIBUTING.md','.env.example','.gitignore','.gitattributes','.dockerignore','Dockerfile','compose.yaml','server.mjs','启动地图.cmd']);
 const folders=new Set(['lib','config','tests','src','data','public','scripts','docs','licenses','.github']);
 export async function releaseFiles(){
  const files=[];

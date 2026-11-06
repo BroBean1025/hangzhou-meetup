@@ -5,9 +5,10 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Hangzhou MeetUp · 杭城同行</title>
 <link rel="stylesheet" href="/assets/vendor-leaflet.a78371028241.css"><link rel="stylesheet" href="/assets/commute-map.e18a6ab65a57.css"><link rel="stylesheet" href="/assets/destination-layout.d3601f5cbca9.css">
+<link rel="stylesheet" href="/assets/trip-time.66fad5296578.css">
 </head>
 <body>
-<header><div class="brand"><div class="eyebrow">杭城同行</div><h1>Hangzhou MeetUp</h1></div><div class="tagline">从校园或地铁站出发，比较到达时间</div><button id="about">数据说明 ↗</button></header>
+<header><div class="brand"><div class="eyebrow">杭城同行</div><h1>Hangzhou MeetUp</h1></div><div class="tagline">从校园或地铁站出发，比较到达时间</div><div class="current-clock" aria-label="当前北京时间"><small id="current-date">北京时间</small><time id="current-clock">--:--:--</time></div><button id="about">数据说明 ↗</button></header>
 <details class="campus-bar" id="origin-panel">
  <summary class="origin-panel-summary"><span class="origin-panel-title">谁一起出发？<small id="origin-selected-count"></small></span><span id="origin-summary"></span><span id="origin-primary-summary"></span><span class="origin-panel-action" aria-hidden="true"></span></summary>
  <div class="origin-panel-content"><div class="origin-panel-tools"><span>展开学校选择校区；各校区独立比较，可分别设置校门和接驳方式。</span><button id="add-origin">＋ 地铁站出发点</button></div><div id="campus-options"></div></div>
@@ -20,6 +21,17 @@
  </div>
  <span id="destination-selection" aria-live="polite">也可以直接点地图</span>
 </section>
+<details id="trip-planner" class="time-planner">
+ <summary>◷ 到达时间与出发安排<span id="trip-plan-summary">设定到达时间，倒推几点出发</span></summary>
+ <div class="time-planner-fields">
+  <label class="arrival-field" for="arrival-time">希望到达目的地的时间 · 北京时间<input id="arrival-time" type="datetime-local" step="60"></label>
+  <label for="travel-buffer">每人途中缓冲（分钟）<input id="travel-buffer" type="number" min="0" max="180" step="1" value="10" inputmode="numeric"></label>
+  <label for="meeting-buffer">每处汇合预留（分钟）<input id="meeting-buffer" type="number" min="0" max="60" step="1" value="3" inputmode="numeric"></label>
+  <div class="time-quick"><button data-arrival-after="60">1 小时后</button><button data-arrival-after="120">2 小时后</button><button id="clear-arrival">清除时间</button></div>
+ </div>
+ <p id="trip-plan-status" role="status"></p>
+ <p>途中缓冲用于候车、进出站等，统一预留在首次汇合前；汇合另留等候及找人的时间。按静态路线倒推，不校验首末班或预约班次，校内步行请自行加进缓冲。</p>
+</details>
 <main class="stage">
  <div class="map-canvas">
  <div id="map" aria-label="以玉泉校区为中心的杭州地铁到达时间地图"></div>
@@ -40,5 +52,6 @@
 <dialog id="gate-picker"><button id="gate-picker-close">取消</button><h2 id="gate-picker-title">选择校门</h2><p>可以勾选多个校门，查询时在所选校门中择优；至少保留一个。</p><div id="gate-choices"></div><p class="gate-note">以已核实的校门参考点出发，不含校内步行；校门临时开放安排以学校为准。</p><button id="gate-apply">应用校门选择</button></dialog>
 <script id="dataset" type="application/json"></script><script id="geography" type="application/json"></script>
 <script src="/assets/map-data.77768c645afb.js"></script>
-<script src="/assets/vendor-leaflet.db49d009c841.js"></script><script src="/assets/map-icons.7d5514e4a34c.js"></script><script src="/assets/station-catalog.022bb2509b42.js"></script><script src="/assets/commute-map.3c289d177345.js"></script><script src="/assets/destination-picker.fb3dc977cfe8.js"></script>
+<script src="/assets/vendor-leaflet.db49d009c841.js"></script><script src="/assets/map-icons.7d5514e4a34c.js"></script><script src="/assets/station-catalog.022bb2509b42.js"></script><script src="/assets/trip-time.2565a68ffe1c.js"></script><script src="/assets/commute-map.1f0f1be28e39.js"></script><script src="/assets/destination-picker.fb3dc977cfe8.js"></script>
+<script src="/assets/trip-planner-ui.d5ec76be876f.js"></script>
 </body></html>

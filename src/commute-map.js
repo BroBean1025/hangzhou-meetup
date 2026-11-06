@@ -233,8 +233,8 @@ function findMeetingCandidates(results,targetIds=[]){
   if(branches.size<2)continue; // They were already together before this station.
   const incomingGroups=[...branches.values()].map(ids=>ids.sort((a,b)=>routeIdentity(a).number-routeIdentity(b).number)).sort((a,b)=>routeIdentity(a[0]).number-routeIdentity(b[0]).number);
   const members=[...incoming.keys()].sort((a,b)=>routeIdentity(a).number-routeIdentity(b).number).map(id=>{
-   const c=byCampus.get(id),value=c.ready&&(!c.summaryExpires||c.summaryExpires>Date.now())?c.times[sid]:null;
-   return {id,seconds:Number.isFinite(value?.seconds)?value.seconds:null,gate:value?.gate_label??c.gate_label};
+   const c=byCampus.get(id),result=results.find(r=>r.origin_id===id);
+   return {id,seconds:MeetUpTime.prefix(result,{sid,line,next}),gate:result.gate_label??c.gate_label};
   });
   const known=members.every(m=>m.seconds!==null),times=members.map(m=>m.seconds);
   candidates.push({sid,next,line,incomingGroups,members,known,spread:known?Math.max(...times)-Math.min(...times):Infinity,longest:known?Math.max(...times):Infinity});
@@ -250,17 +250,18 @@ function meetingTrunk(candidate){return '<p class="meeting-trunk">从这里开�
 
 function renderMeetings(){
  const panel=$('meeting-panel'),entry=$('meeting-entry');panel.hidden=!routeSelectionActive||enabled.size<2;entry.hidden=panel.hidden;
- meetingCandidates=[];if(panel.hidden){renderMeetingMarkers();return;}
+ meetingCandidates=[];if(panel.hidden){window.refreshTripPlan?.();renderMeetingMarkers();return;}
  const pending=lastResults.length<enabled.size||lastResults.some(r=>r.preview);
  if(!pending)meetingCandidates=findMeetingCandidates(lastResults,lastTarget?.stationIds??[]);
+ window.refreshTripPlan?.();
  const ready=meetingCandidates[0];entry.innerHTML=(ready?meetingBadges(ready):'◇')+'<span>途中汇合</span>';entry.title=ready?ready.members.map(m=>byCampus.get(m.id).short_name).join(' + ')+'：查看建议汇合站':'查看不同来路汇入同向共同路段的站点';entry.setAttribute('aria-expanded',String(panel.open));
  $('meeting-count').textContent=pending?'查询中':meetingCandidates.length?' · '+meetingCandidates.length+' 个建议':' · 暂无';
  const failed=lastResults.filter(r=>r.error).length;
  $('meeting-results').innerHTML=meetingCandidates.map((candidate,i)=>{
   const p=points.get(candidate.sid),who=candidate.members.map(m=>byCampus.get(m.id).short_name).join(' ＋ ');
-  return '<article class="meeting-card" data-meeting-card="'+i+'"><div class="meeting-title"><span class="meeting-members">'+meetingBadges(candidate)+'</span><strong>'+esc(p.name)+'</strong><small>'+candidate.members.length+'/'+enabled.size+' 起点</small></div><p class="meeting-who">'+esc(who)+'汇合</p>'+meetingTrunk(candidate)+'<div class="meeting-times">'+candidate.members.map(m=>'<span>'+routeBadge(m.id)+esc(byCampus.get(m.id).short_name)+'<small>'+esc(m.gate??'')+'</small><b>'+(m.seconds===null?'待更新':minute(m.seconds)+'分')+'</b></span>').join('')+'</div><p>'+(candidate.known?'同时出发，最晚约 '+minute(candidate.longest)+' 分钟到站 · 时间差约 '+minute(candidate.spread)+' 分钟':'部分到站时间未取得，暂不比较等待时间')+'</p><div class="meeting-actions"><button data-meeting-locate="'+i+'">地图定位</button><button data-meeting-select="'+i+'">设为目的地</button></div></article>';
+  return '<article class="meeting-card" data-meeting-card="'+i+'"><div class="meeting-title"><span class="meeting-members">'+meetingBadges(candidate)+'</span><strong>'+esc(p.name)+'</strong><small>'+candidate.members.length+'/'+enabled.size+' 起点</small></div><p class="meeting-who">'+esc(who)+'汇合</p>'+meetingTrunk(candidate)+(window.meetingScheduleHTML?.(candidate)??'')+'<div class="meeting-times">'+candidate.members.map(m=>'<span>'+routeBadge(m.id)+esc(byCampus.get(m.id).short_name)+'<small>'+esc(m.gate??'')+'</small>'+(window.meetingMemberTime?.(candidate,m)??'<b>'+(m.seconds===null?'逐站时间未知':minute(m.seconds)+'分')+'</b>')+'</span>').join('')+'</div><p>'+(window.meetingTimingSummary?.(candidate)??'当前路线到站时间估计')+'</p><div class="meeting-actions"><button data-meeting-locate="'+i+'">地图定位</button><button data-meeting-select="'+i+'">设为目的地</button></div></article>';
  }).join('')||(pending?'<p>等待各起点路线完成，再找开始同行的汇合站…</p>':'<p>当前行程没有中途合流点：需要从不同来路到站，随后乘同一线路、同一方向继续。仅交叉或到站后各走各的，不算合流。</p>');
- $('meeting-note').textContent=(failed?'部分起点查询失败，建议只包含成功行程。':'')+'只推荐不同来路开始共用同向区间的站，不重复推荐已同行的下游站；第三人加入可形成新的合流点。按参与人数、到站时间差、最晚到达时间排序。时间为所选校门/接驳到该站的最短估计，可能与当前行程前半段不同；不含等人和额外站内步行，请另约碰面位置。';
+ $('meeting-note').textContent=(failed?'部分起点查询失败，建议只包含成功行程。':'')+'只推荐不同来路开始共用同向区间的站，不重复推荐已同行的下游站；第三人加入可形成新的合流点。按参与人数、到站时间差、最晚到达时间排序。到站时间沿当前行程累计，包含该行程已发生的接驳和换乘；缺少逐站权重时不猜测钟点。设置到达时间后，按每人途中缓冲、每处汇合预留协调出发；请另约具体碰面位置。';
  for(const b of panel.querySelectorAll('[data-meeting-locate]'))b.onclick=()=>locateMeeting(Number(b.dataset.meetingLocate));
  for(const b of panel.querySelectorAll('[data-meeting-select]'))b.onclick=()=>selectStation(points.get(meetingCandidates[Number(b.dataset.meetingSelect)].sid));
  renderMeetingMarkers();
@@ -459,6 +460,7 @@ function resultCard(r){
  const c=byCampus.get(r.origin_id);let html='<article class="campus-result" style="--journey-color:'+routeIdentity(c.id).color+'" data-origin="'+c.id+'"><div class="result-heading">'+routeBadge(c.id)+logoHtml(c)+'<div><strong>'+esc(c.short_name)+'</strong><small>'+esc(r.gate_label??c.gate_label)+(c.kind==='station'?'':'出发')+'</small></div><span class="result-time">'+(r.total_seconds==null?'未知':minute(r.total_seconds)+'<small>分钟</small>')+'</span></div>';
  if(r.error)return html+'<div class="popup-error">'+esc(r.error)+'</div></article>';
  if(r.preview)return html+'<div class="popup-sub">'+(r.total_seconds==null?'正在查询完整时间和路线…':'已取得站点时间，正在查询路线…')+'</div></article>';
+ html+='<div data-departure-for="'+esc(c.id)+'" hidden></div>';
  html+='<button class="journey-endpoints" data-route-heading="'+esc(c.id)+'" aria-label="聚焦'+esc(c.short_name)+'到'+esc(lastTarget?.name??'目的地')+'的路线">'+esc(c.short_name)+' <span>→</span> '+esc(lastTarget?.name??'目的地')+'</button><div class="route-line-tags">'+(r.legs??[]).filter(l=>l.kind==='ride').map(l=>'<span><i style="background:'+esc(lines.get(l.line_id)?.color??'#71816a')+'"></i>'+esc(l.line_name)+'</span>').join('')+'</div><div class="popup-route">'+routeDescription(r)+'</div>';
  html+='<div class="route-meta">'+(r.mode==='metro'?'换乘 '+r.transfers+' 次':'直接步行')+(r.fare!=null?' · 票价约 '+r.fare+' 元':'')+' <button class="show-route" data-route="'+c.id+'">在地图看路线</button></div>';
  html+=accessOverview(r);
