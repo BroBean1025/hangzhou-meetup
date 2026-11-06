@@ -6,6 +6,11 @@ import {stationDepartures} from '../../core/lib/route-timing.mjs';
 const data=JSON.parse(fs.readFileSync('core/data/map.json','utf8')),snapshot=JSON.stringify(data);
 const context=vm.createContext({});vm.runInContext(fs.readFileSync('core/src/rail-display.js','utf8'),context);
 const display=context.createRailDisplay(data),points=new Map(data.points.map(p=>[p.id,p]));
+test('all separated interchange stations, including railway hubs, receive a connected schematic',()=>{
+ const stations=data.points.filter(p=>p.is_interchange&&display.nodes(p,16).length>1);
+ assert.ok(stations.some(p=>p.name==='火车东站（东广场）'));assert.ok(stations.some(p=>p.name==='临平南高铁站'));
+ for(const p of stations){const nodes=display.nodes(p,16),links=display.connections(p,16);assert.equal(links.length,nodes.length-1,p.name);const seen=new Set([links[0][0]]);for(const [a,b] of links){assert.ok(seen.has(a));assert.ok(!seen.has(b));seen.add(b);}assert.equal(seen.size,nodes.length);assert.equal(display.connections(p,14).length,0);}
+});
 test('separated transfer links preserve the provider time once, including downstream departures',()=>{
  const id='cn-hangzhou-shanxian',p=points.get(id);
  const result={legs:[{kind:'ride',line_id:'cn-hangzhou-line-3',seconds:120,station_ids:['before',id]},{kind:'transfer',from_station_id:id,to_station_id:id,seconds:193},{kind:'ride',line_id:'cn-hangzhou-line-5',seconds:180,station_ids:[id,'after']}]};
