@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="@@vendor/leaflet.css@@"><link rel="stylesheet" href="@@commute-map.css@@"><link rel="stylesheet" href="@@destination-layout.css@@">
 <link rel="stylesheet" href="@@trip-time.css@@">
 <link rel="stylesheet" href="@@window-layout.css@@"><link rel="stylesheet" href="@@readability.css@@">
+<link rel="stylesheet" href="@@resizable-panels.css@@">
 </head>
 <body>
 <header><div class="brand"><div class="eyebrow">杭城同行</div><h1>Hangzhou MeetUp</h1></div><div class="tagline">从校园或地铁站出发，比较到达时间</div><div class="current-clock" aria-label="当前北京时间"><small id="current-date">北京时间</small><time id="current-clock">--:--:--</time></div><button id="about">数据说明 ↗</button></header>
@@ -48,7 +49,7 @@
  </div>
  <aside id="comparison" hidden aria-label="各出发点到达时间"><button id="comparison-close" aria-label="关闭地点比较">×</button><h2 id="destination-title">到这里</h2><div id="comparison-summary" aria-live="polite"></div><details id="meeting-panel" hidden><summary>◇ 途中汇合<span id="meeting-count"></span></summary><div id="meeting-results"></div><p id="meeting-note"></p></details><div id="access-legend" hidden aria-label="接驳路线图例"></div><div id="comparison-results"></div><div class="comparison-note">整数分钟估算；非实时列车时间，进出站及安检另计。<span id="scope-note"></span></div></aside>
 </main>
-<dialog id="information"><button id="info-close">关闭</button><h2>数据与时间口径</h2><div id="notes"></div></dialog>
+<dialog id="information"><button id="info-close">关闭</button><h2>使用与数据说明</h2><div id="notes"></div></dialog>
 <dialog id="station-picker"><button id="station-picker-close">关闭</button><h2>添加地铁站出发点</h2><p>可继续添加，不限数量。同一站无需重复添加；从站内起算。</p><input id="station-search" placeholder="搜索站名，例如 杭州东、龙翔桥" aria-label="搜索运营地铁站"><div id="station-results"></div></dialog>
 <dialog id="gate-picker"><button id="gate-picker-close">取消</button><h2 id="gate-picker-title">选择校门</h2><p>可以勾选多个校门，查询时在所选校门中择优；至少保留一个。</p><div id="gate-choices"></div><p class="gate-note">以已核实的校门参考点出发，不含校内步行；校门临时开放安排以学校为准。</p><button id="gate-apply">应用校门选择</button></dialog>
 <script id="dataset" type="application/json"></script><script id="geography" type="application/json"></script>
@@ -57,4 +58,5 @@
 <script src="@@trip-planner-ui.js@@"></script>
 <script src="@@desktop-settings.js@@"></script>
 <script src="@@desktop-updates.js@@"></script><script src="@@route-preferences.js@@"></script>
+<script src="@@resizable-panels.js@@"></script>
 </body></html>

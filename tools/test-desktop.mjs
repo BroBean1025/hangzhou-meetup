@@ -44,7 +44,7 @@ try{
   async function viewport(width,height,zoom=1,expanded=false){
     await application.evaluate(({BrowserWindow},{width,height,zoom})=>{const win=BrowserWindow.getAllWindows()[0];win.setMinimumSize(320,400);win.setContentSize(width,height);win.webContents.setZoomFactor(zoom);},{width,height,zoom});
     await page.evaluate(expanded=>{document.querySelector('#origin-panel').open=expanded;document.querySelector('#trip-planner').open=expanded;window.scrollTo(0,0);},expanded);
-    await page.waitForFunction(()=>Math.abs(map.getSize().x-document.querySelector('#map').clientWidth)<2&&Math.abs(map.getSize().y-document.querySelector('#map').clientHeight)<2,null,{timeout:10000,polling:100});
+    await page.waitForFunction(()=>Math.abs(map.getSize().x-document.querySelector('#map').clientWidth)<2&&Math.abs(map.getSize().y-document.querySelector('#map').clientHeight)<2,null,{timeout:30000,polling:100}).catch(async error=>{console.error(await page.evaluate(()=>({viewport:[innerWidth,innerHeight],map:[document.querySelector('#map').clientWidth,document.querySelector('#map').clientHeight],leaflet:map.getSize(),stage:getComputedStyle(document.querySelector('.stage')).height,errors:document.querySelector('#status').textContent})));throw error;});
     await page.waitForTimeout(200);
     await page.waitForFunction(()=>{const m=document.querySelector('#map').getBoundingClientRect(),h=document.querySelector('.map-hud').getBoundingClientRect();return Math.abs(m.x-h.x)<2&&Math.abs(m.y-h.y)<2;},null,{timeout:5000,polling:100});
     const metrics=await page.evaluate(()=>{

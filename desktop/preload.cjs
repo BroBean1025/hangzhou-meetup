@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('desktop',{
   onUpdateState:callback=>ipcRenderer.on('desktop:update-state',(_event,state)=>callback(state)),
   onShowUpdates:callback=>ipcRenderer.on('desktop:show-updates',()=>callback())
 });
-const keys=['hangzhou-origins-v2','hangzhou-trip-buffer-v1','hangzhou-route-preferences-v1'];
+const keys=['hangzhou-origins-v2','hangzhou-trip-buffer-v1','hangzhou-route-preferences-v1','hangzhou-panel-layout-v1'];
 function persist(){
   const value={};for(const key of keys){const item=localStorage.getItem(key);if(item!==null)value[key]=item;}
   ipcRenderer.send('desktop:write-preferences',value);

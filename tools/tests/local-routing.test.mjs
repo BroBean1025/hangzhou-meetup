@@ -35,7 +35,7 @@ test('embedded fares cover every Hangzhou OD and repair official-name mismatches
  assert.equal(stationFare('unknown',main),null);
  const ride={kind:'ride',from_station_id:id('west-railway-station'),to_station_id:square};
  assert.equal(quoteFare({legs:[ride,{kind:'walk_transfer',from_station_id:square,to_station_id:main}]},ride.from_station_id,main).fare,7);
- assert.equal(quoteFare({legs:[ride,{kind:'walk_transfer'},ride]},ride.from_station_id,main).fare,null);
+ assert.equal(quoteFare({legs:[ride,{kind:'walk_transfer'},ride]},ride.from_station_id,main).fare,14);
 });
 test('station routes, alternate fares and Yuquan nearby boarding work with all external requests disabled',async()=>{
  const original=globalThis.fetch;globalThis.fetch=async()=>{throw Error('Unexpected external request');};

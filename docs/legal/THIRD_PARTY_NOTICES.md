@@ -32,3 +32,5 @@
 - [高德 Web 服务说明](https://lbs.amap.com/api/webservice/summary)、[高德开放平台服务协议](https://lbs.amap.com/pages/terms/)。
 
 记录日期：2026-11-05。数据中的抓取时间/来源字段保留其原始值；记录日期不是数据刷新日期。
+
+杭海、绍兴站间票价快照位于 `core/config/regional-fares.json`，数据来自杭海运营票价公开图（杭州日报报道）与绍兴市轨道交通集团官网。仅收录事实性站间金额及来源信息，未复制网站界面、报道全文或官方图件；详见[票价数据说明](../FARES.md)。

@@ -503,6 +503,7 @@ function resultCard(r){
  html+='<div data-departure-for="'+esc(c.id)+'" hidden></div>';
  const journeyHTML='<button class="journey-endpoints" data-route-heading="'+esc(c.id)+'" aria-label="聚焦'+esc(c.short_name)+'到'+esc(lastTarget?.name??'目的地')+'的路线">'+esc(c.short_name)+' <span>→</span> '+esc(lastTarget?.name??'目的地')+'</button><div class="route-line-tags">'+(r.legs??[]).filter(l=>l.kind==='ride').map(l=>'<span><i style="background:'+esc(lines.get(l.line_id)?.color??'#71816a')+'"></i>'+esc(l.line_name)+'</span>').join('')+'</div><div class="popup-route">'+routeDescription(r)+'</div>';
  html+='<div class="route-meta"><span class="route-metric">'+(r.mode==='metro'?'换乘 '+r.transfers+' 次':'直接步行')+'</span><span class="route-metric fare">'+(r.mode==='walk'?'无需车票':r.fare!=null?'票价约 '+r.fare+' 元':'票价待确认')+'</span><button class="show-route" data-route="'+c.id+'">查看路线</button></div>';
+ if(r.fare_note)html+='<div class="fare-condition">'+esc(r.fare_note)+'</div>';
  html+=(window.routeAlternativesHTML?.(r)??'')+journeyHTML;
  html+=accessOverview(r);
  if(r.legs?.some(l=>l.kind==='walk_transfer'))html+='<div class="popup-footnote">跨站区步行采用高德站点参考位置规划；室内通道和出入口以现场指引为准。出站换乘票价以实际计费为准。</div>';
@@ -598,21 +599,11 @@ new ResizeObserver(scheduleMapResize).observe($('map'));
 window.addEventListener('resize',scheduleMapResize);
 $('journey-all').onclick=()=>{leaveAccessDetail(true);routeFocus=null;syncRouteFocus();fitJourney();updateLabels();};
 for(const text of [
- '杭州地铁普通单程票价按实际进出站查内置票价表；不含公交、打车等接驳费用和个人优惠。未覆盖的跨区域区间、需要确认连续计费的出站换乘标为待确认。站间路线与票价在本地计算，数据随程序版本更新。',
- '放大后的分线站位用虚线表示站内换乘连接示意，并非实际通道路径。有路线时显示该次换乘的步行时间，已计入总耗时、途中汇合和出发时间安排，不会随缩放重复增加；同线途经不额外计入换乘。',
- '查询路线用起点编号与颜色区分，查询时底层地铁网统一灰显，官方线路颜色仅保留在卡片线路标签中；清除目的地后恢复彩色地铁网。共同路段合并成一条并标出参与起点编号；沿原始轨迹衔接，不生成额外的偏移轨道或人工连接。点击起点、路线、图例或结果卡可聚焦完整行程；点总览恢复全部。接驳沿用起点颜色，点线为步行，其他虚线为相应接驳方式。',
- '可添加任意数量的具体运营地铁站出发点；自定义站点从站内起算。学校可多选校门，并选择步行、公交、骑行或打车接驳。勾选出发点参与比较；主出发点只决定枢纽时间和回中位置。学校从所选校门出发，自定义地铁站从站内起算，方向均为出发点到目的地。'+campuses.map(c=>c.name+'：'+c.gate_label).join('；')+'。',
- '时间取整数分钟。站点和左侧枢纽时间包括校门至上车站步行、地铁乘车及换乘；终点是地铁站。任意地图选点另加下车后至选点的高德步行。3公里内也比较直接步行。',
- '缩小时只显示五个交通枢纽；中等缩放显示换乘站及名称，继续放大显示普通站及名称。杭州线路颜色使用OpenMetro字段；杭海、绍兴线路采用高德线路颜色。共线区段做少量视觉平移。',
- (D.segments.every(s=>s.coordinates?.length>=2)?'地铁线沿已取得的轨迹折线绘制，地图缩放时保持轨迹形状；共线部分只做少量屏幕偏移，箭头沿实际乘车方向。':'部分区间尚无轨迹坐标，仅以相邻站连线表示，不能作为精确轨道位置。')+'杭州东作为起终点时合并 1/4/6/19 号线择优，路线注明实际站区。途中需要跨站区时，单独计入出站步行，并以点线显示高德返回的步行路径；室内通道和出入口以现场指引为准。',
- '杭州地铁数据同步：'+D.synced_at+'；跨城补充数据：'+(D.regional_data_at??'未接入')+'。均为静态规划；不判断首末班及实时等待，进出站及安检另计。',
- '线路轨迹：'+(D.track_source??'当前快照未提供')+(D.track_coverage?'；已匹配 '+D.track_coverage.matched_edges+' / '+D.track_coverage.expected_edges+' 个运营区间。':'。')+(D.track_note??'')+'换乘站统一标记与各线站台位置可能不同。杭州时间与站序来自 OpenMetro；新增跨城段为高德缓存补充。地图底图来源另列。',
- '底图：OpenStreetMap真实水域、主干路、林地和校区轮廓，快照 '+G.metadata.queried_at+'，ODbL-1.0。地铁GCJ02坐标近似转换至WGS84。',
- '校区区域随勾选显示，主出发校区边界略加深；切换校门不改变校区范围。边界来源 OpenStreetMap，快照 '+(G.metadata.campus_boundaries_at??G.metadata.queried_at)+'；用于地图定位，不代表校门开放范围。',
- '打车按驾车行驶时间估算，不含等车；骑行不含取还车。公交使用提供方方案总时间，班次与预约提示见结果。接驳失败会明确报错，不会静默回退为步行或直线距离估算。',
- '底图与站点时间已内嵌。任意选点需要本机查询服务和网络；高德Key仅保存在本机服务环境中，不进入页面。',...D.warnings.filter(w=>!w.includes('可达站点'))]){const p=document.createElement('p');p.textContent=text;$('notes').append(p)}
-if(D.regional_timing_note){const p=document.createElement('p');p.textContent=D.regional_timing_note;$('notes').append(p);}
-for(const c of campuses){if(c.note){const p=document.createElement('p');p.textContent=c.name+'：'+c.note;$('notes').append(p);}}
+ '时间：包含接驳、地铁和换乘步行；候车、安检和校内步行请另留缓冲，不校验首末班。设置到达时间可倒推出发时间。',
+ '票价：内置杭州、杭海、绍兴站间普通票价，跨区域分段相加；不含个人优惠及公交、打车费用。出站换乘的支付条件会随路线单独说明。',
+ '地图：颜色与编号对应起点，点击可聚焦。实线为地铁，点线为步行；放大后的站内换乘虚线仅为连接示意，步行时间已计入行程。',
+ '设置：拖动顶部或路线区边缘可调整大小，点击按钮可收起或展开。网络接驳查询需要自行填写高德 Key，站间路线与票价可本地计算。'
+]){const p=document.createElement('p');p.textContent=text;$('notes').append(p);}
 const sources=document.createElement('p');sources.innerHTML='<a href="https://openmetro.dev" target="_blank" rel="noopener">OpenMetro 时间与站序</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap 底图 / ODbL</a> · <a href="https://lbs.amap.com/api/webservice/guide/api/bus-inquiry" target="_blank" rel="noopener">高德线路轨迹</a> · <a href="https://lbs.amap.com/api/webservice/guide/api/direction" target="_blank" rel="noopener">高德步行规划</a>';$('notes').append(sources);
 $('about').onclick=()=>$('information').showModal();$('info-close').onclick=()=>$('information').close();
 

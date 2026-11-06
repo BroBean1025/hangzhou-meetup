@@ -32,6 +32,8 @@ npm run pack:release   # 生成 releases/hangzhou-meetup-source.tar.gz
 
 杭州站间路线和票价使用 `core/config/rail-snapshot.json`，运行时直接在本地计算。刷新公开数据时运行 `node tools/sync-rail-snapshot.mjs`：下载 OpenMetro 目录、时长及票价表，并用杭州地铁官方查询重新核验异常票价行。该操作不需要高德 Key，耗时约数分钟，失败不会覆盖完整快照；中途结果暂存在忽略的 `test-artifacts/` 中。检查数据日期、站点和地图是否一致后运行测试并提交，随下次完整程序更新发布。
 
+杭海、绍兴票价使用 `core/config/regional-fares.json`。`node tools/sync-regional-fares.mjs` 从绍兴官网的数据模块提取票价，并合入已逐格核对的杭海官方票价图；只解析数据，不执行下载的代码。缺失站点、双向价格或换乘站同名记录冲突会终止写入。同步脚本不需要高德 Key。运行 `node --test tools/tests/regional-fares.test.mjs` 验证全站对覆盖、边界计费与杭州东虚拟换乘；运行 `node tools/test-panels-desktop.mjs` 验证拖动、缩放和布局持久化。
+
 路由使用二叉堆 Dijkstra，同一起点的搜索结果可复用于所有目的地；缓存有数量上限。步行接驳只保留比最近可达站最多多5分钟、500米的候选；所有站较远时仍保留最近可达站。少换乘在时间优先方案的基础上最多多花10分钟、增加5分钟站外步行。骑行、公交和打车是用户主动选择的接驳方式，不套用步行上车站距离限制。
 
 ```text
