@@ -1,6 +1,6 @@
 # 参与维护
 
-1. 安装 Node.js 22.13+；无需 npm 依赖安装。
+1. 开发及完整测试使用 Node.js 24 与 pnpm 11.25.0，先运行 `pnpm install --frozen-lockfile`。仅运行核心浏览器版无需安装依赖，见[源码使用说明](docs/SOURCE_USAGE.md)。
 2. `npm run setup`，在自己的 `.env` 中填写自己的高德 Web 服务 Key。
 3. 编辑 `src/` 或 `lib/`；前端修改后运行 `npm run build` 并重启服务。
 4. 提交前运行 `npm test`、`npm run check:release`；界面修改同时检查电脑及手机布局。

@@ -1,10 +1,54 @@
 # Hangzhou MeetUp · 杭城同行
 
-Windows 桌面版提供[安装包及免安装 EXE](https://github.com/BroBean1025/hangzhou-meetup/releases/latest)，支持每天首次打开自动检查更新，以及程序内手动检查、下载更新。向 `main` 推送代码后，GitHub Actions 会测试、构建并发布新版。使用与构建方法见 [桌面版说明](desktop/README.md)。原有 Web 启动方式仍可使用。
+杭州地铁多起点出行地图：比较通勤时间、选择校门接驳、安排途中汇合和到达时间。支持 Windows 桌面应用，也支持直接运行源码、在浏览器使用。
+
+**[⬇ 下载 Windows EXE](https://github.com/BroBean1025/hangzhou-meetup/releases/latest) · [⬇ 下载源码 ZIP](https://github.com/BroBean1025/hangzhou-meetup/archive/refs/heads/main.zip) · [查看功能演示](#功能演示)**
+
+## 选择一种使用方式
+
+| 使用方式 | 适合谁 | 下载与启动 |
+| --- | --- | --- |
+| **Windows 安装版（推荐）** | 想安装后直接使用、在程序内升级 | [打开最新版本下载页](https://github.com/BroBean1025/hangzhou-meetup/releases/latest)，在 **Assets** 中下载 `HangzhouMeetUp-Setup-版本号.exe` |
+| Windows 免安装版 | 想下载单个 EXE 后直接运行 | [打开最新版本下载页](https://github.com/BroBean1025/hangzhou-meetup/releases/latest)，在 **Assets** 中下载 `HangzhouMeetUp-Portable-版本号.exe` |
+| **核心源码 / 浏览器版** | 使用 Windows、macOS、Linux，或想修改代码、部署网站 | [下载源码 ZIP](https://github.com/BroBean1025/hangzhou-meetup/archive/refs/heads/main.zip)，按[源码运行步骤](#运行核心源码)启动 |
+
+### 下载并使用 EXE
+
+1. 打开上面的最新版本下载页，展开 **Assets**，选择 `Setup` 安装包或 `Portable` 免安装包。桌面版适用于 **Windows x64**，无需另装 Node.js；页面里的 `Source code` 是源码压缩包。
+2. 安装版运行安装程序，再打开桌面上的“杭城同行”；免安装版直接双击下载的 EXE。
+3. 首次使用，在右上角 **设置** 中填写**自己申请的高德 Web 服务 Key**并保存。[Key 申请方法](docs/CONFIGURATION.md#申请)
+
+**公开源码和 EXE 均不附带作者的高德 Key。** 每位用户自行填写，Key 保存在自己的电脑上。没有 Key 也可以浏览内置地图，完整的校门接驳和任意选点查询需要配置服务。
+
+安装版每天首次打开自动检查更新，也可点击 **更新 → 检查更新 → 下载更新 → 重启并安装**。免安装版会打开新版 EXE 的下载地址，下载后关闭旧程序并替换文件。[详细使用、快捷键和更新机制](desktop/README.md)
+
+### 运行核心源码
+
+安装 [Node.js](https://nodejs.org/) **22.13 或更新版本**，下载并解压上面的源码 ZIP，进入包含 `server.mjs` 和 `package.json` 的目录：
+
+```sh
+npm run setup
+```
+
+用文本编辑器打开生成的 `.env`，在 `AMAP_WEB_SERVICE_KEY=` 后填写**自己的高德 Web 服务 Key**，保存后运行：
+
+```sh
+npm run doctor
+npm start
+```
+
+浏览器打开 **http://localhost:8080**，保持终端开启。核心服务运行无需 `npm install`，也不需要 Electron、ChatGPT 或 Codex；Windows 用户还可以双击 `启动地图.cmd`。[完整源码使用说明](docs/SOURCE_USAGE.md) · [手机访问与部署](docs/CONFIGURATION.md)
+
+两种方式使用同一套地图与路线功能，下面的功能演示均适用。
 
 ## 最近更新
 
 <!-- recent-updates:start -->
+**2026-11-06 · 下载入口与源码使用指南**
+
+- 首页直接提供 Windows 安装版、免安装版和源码 ZIP 的入口，标明应下载的文件。
+- 保留原有功能演示，补充独立源码运行指南，明确所有下载者都需填写自己的高德 Key。
+
 **2026-11-06 · Windows 桌面版与自动更新**
 
 - 提供安装版和免安装 EXE，适配宽屏、窄窗口、较矮窗口及界面缩放。
@@ -18,13 +62,6 @@ Windows 桌面版提供[安装包及免安装 EXE](https://github.com/BroBean102
 - **缓冲自己定**：每人途中缓冲默认 10 分钟，每处汇合预留默认 3 分钟；修改设置不增加高德调用。
 - 主界面新增当前北京时间；汇合耗时沿实际选定路线累计。时间仍为静态估计，不校验首末班。
 
-**2026-11-05 · 功能演示与学校扩展说明**
-
-补充 8 张高清演示图，并提供添加学校、校区和校门的指南。三所大学仅作示例，下载后可自行扩展。
-
-**2026-11-05 · 首次发布到 GitHub**
-
-提供可独立运行的多起点地铁地图，支持校门与接驳选择、路线比较、途中汇合和交通枢纽估时。
 <!-- recent-updates:end -->
 
 **[查看完整更新日志 →](CHANGELOG.md)**
@@ -97,43 +134,6 @@ Windows 桌面版提供[安装包及免安装 EXE](https://github.com/BroBean102
 
 截图中的时间来自示例校门、接驳方式和当次查询，仅用于演示操作，不是实时列车到站时间。
 
-## 在自己的电脑上运行
-
-这是独立的 Node.js 应用，无需 ChatGPT、Codex、Python 或第三方 npm 包。先安装 [Node.js](https://nodejs.org/) **22.13 或更新版本**，下载并解压项目，进入包含 `server.mjs` 和 `package.json` 的目录。
-
-```sh
-npm run setup
-```
-
-这会创建空白 `.env`，已有文件会保留。用文本编辑器填写自己申请的高德 Web 服务 Key：
-
-```dotenv
-AMAP_WEB_SERVICE_KEY=在这里填写自己的高德Web服务Key
-HOST=127.0.0.1
-PORT=8080
-```
-
-把中文提示替换为真实 Key，保存后运行：
-
-```sh
-npm run doctor
-npm start
-```
-
-浏览器打开 **http://localhost:8080**，保持终端开启。无需执行 `npm install`。Windows 用户也可以双击 `启动地图.cmd`，首次运行会创建并打开配置文件。
-
-`doctor` 检查所需文件和 Key 是否填入，不会显示 Key 或消耗高德接口额度，也不验证账户权限与余额。修改 `.env` 后需要重启服务；若系统已经有同名环境变量，Node 会优先使用系统环境变量。
-
-高德 Key 的申请步骤、手机访问方法和常见报错都在 [配置指南](docs/CONFIGURATION.md) 中。
-
-### Key 由谁提供
-
-每个部署使用自己的 `AMAP_WEB_SERVICE_KEY`。Key 只由后端发往高德 API，不会写进网页、浏览器本地存储、截图或公开接口响应。仓库中的 `.env.example` 是空白模板，真实 `.env` 已由 `.gitignore` 排除。
-
-下载者在自己的电脑或服务器上运行时，使用自己的额度；如果部署成一个供多人访问的网站，访客共用该服务器的 Key，不需要逐人在网页中填写。项目不附带作者的 Key，也不调用作者的托管网站。
-
-没有 Key 时仍能浏览内置地图，部分站到站查询也可用。学校接驳或任意选点查询遇到未缓存的数据时，会提示缺少服务，不会把站间时间补成完整出行时间。缓存可以减少调用，但不保证所有查询都不消耗高德额度；额度按接口调用量计算。
-
 ## 使用自己的学校数据
 
 内置校区提供了一个可以照着扩展的例子。新增学校主要涉及三处数据：
@@ -150,7 +150,10 @@ npm start
 
 ## 开发与维护
 
+仅运行核心服务无需安装依赖。开发时要运行包含桌面更新模块的完整测试，请使用 Node.js 24 与 pnpm 11.25.0，先安装开发依赖：
+
 ```sh
+pnpm install --frozen-lockfile
 npm run build          # 从 src/ 和 data/ 重建 public/，不请求高德
 npm test               # 不需要真实 Key，不调用在线供应商
 npm run check:release  # 扫描发布文件与常见密钥特征
@@ -167,7 +170,9 @@ lib/             查询、缓存、换乘与跨城路由
 public/          构建后的网页资源，运行时直接提供
 scripts/         初始化、构建、检查、打包
 tests/           离线自动化测试
+desktop/         Windows 外壳、更新逻辑、图标与桌面版说明
 docs/            配置、架构与截图
+.github/         自动检查及 Windows 发布流程
 server.mjs       独立 HTTP 服务
 .env.example     空白环境变量模板
 ```

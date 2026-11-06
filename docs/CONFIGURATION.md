@@ -9,7 +9,13 @@
 
 依据：[高德创建应用和 Key](https://lbs.amap.com/api/webservice/create-project-and-key)。配额、认证及具体接口可用性以你自己的控制台为准，不在本项目中保证免费额度。
 
-## Windows
+## Windows EXE
+
+从[最新版本下载页](https://github.com/BroBean1025/hangzhou-meetup/releases/latest)下载 `HangzhouMeetUp-Setup-版本号.exe` 或 `HangzhouMeetUp-Portable-版本号.exe`，运行后打开右上角 **设置**，填写自己的 **Web 服务 Key**并保存。无需安装 Node.js 或编辑 `.env`。
+
+公开 EXE 不附带作者的 Key。填写的值保存在自己的 `%APPDATA%\HangzhouMeetUp\settings.json` 中，升级应用会保留；首次在另一台电脑使用时需重新填写。
+
+## Windows 源码版
 
 安装 Node.js 22.13+ 后，解压项目并在项目目录打开终端：
 
@@ -43,6 +49,8 @@ node --env-file=.env server.mjs
 
 ## 手机访问
 
+以下局域网及公网部署使用[核心源码运行方式](SOURCE_USAGE.md)；EXE 的本地服务仅供本机窗口使用。
+
 同一 Wi-Fi 下，将 `.env` 的 `HOST` 改为 `0.0.0.0`，重启后用手机访问 `http://电脑局域网IP:8080`，例如 `http://192.168.1.25:8080`。实际 IP 以电脑当前网络为准。
 
 电脑必须保持运行；如被防火墙阻止，只为所需专用网络开放端口。`localhost` 在手机上指手机自身。这里的局域网设置不会产生可供外网朋友访问的网址。
@@ -61,7 +69,7 @@ Docker Compose 默认只绑定本机端口，供反向代理连接。若需要�
 
 | 现象 | 检查方式 |
 | --- | --- |
-| 地图能显示，学校路线失败 | 检查 `.env`、Web 服务 Key 类型和重启；地图快照可以不带 Key 显示 |
+| 地图能显示，学校路线失败 | EXE 检查右上角“设置”；源码版检查 `.env` 和重启。确认使用 Web 服务 Key；地图快照可以不带 Key 显示 |
 | 高德返回 10001、10009 等错误码 | 按[高德错误码文档](https://lbs.amap.com/api/webservice/guide/tools/info)检查 Key、账户、平台类型和权限 |
 | 超时或暂不可用 | 检查服务器能否访问 OpenMetro 和高德；稍后重试，避免连续点击 |
 | `.env` 改了却不生效 | 重启；检查系统是否已有同名环境变量，系统变量优先 |
