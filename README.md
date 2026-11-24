@@ -10,6 +10,7 @@
 | --- | --- |
 | **Windows 安装版（推荐）** | 在[最新版本页](https://github.com/BroBean1025/hangzhou-meetup/releases/latest)的 **Assets** 中下载 `HangzhouMeetUp-Setup-版本号.exe`，安装后打开“杭城同行” |
 | Windows 免安装版 | 在同一页面下载 `HangzhouMeetUp-Portable-版本号.exe`，双击运行 |
+| 微信小程序源码 | 运行 `npm run wechat:dev`，在微信开发者工具中导入 `wechat/`。[本机预览与手机配置](wechat/README.md) |
 | **核心源码 / 浏览器版** | [下载源码 ZIP](https://github.com/BroBean1025/hangzhou-meetup/archive/refs/heads/main.zip)，按[源码使用指南](docs/SOURCE_USAGE.md)启动；支持 Windows、macOS、Linux |
 
 ### 使用 EXE
@@ -64,6 +65,11 @@ npm start
 ## 最近更新
 
 <!-- recent-updates:start -->
+**2026-11-24 · 微信原生小程序可在开发者工具预览**
+
+- 在微信地图上比较各个校门和地铁站的行程，查看枢纽估时、共同路段与汇合站。小程序沿用桌面版的路线计算和到达时间倒推。[预览指南](wechat/README.md)
+- 微信端可在 GitHub Actions 手动生成真机预览码或上传开发版。[配置与使用](wechat/README.md#从-github-生成预览码或上传开发版)
+
 **2026-11-07 · 地图提示不再挤成竖条**
 
 - 共同路段、途中汇合、接驳及换乘提示横向展开，长内容正常分行。
@@ -79,10 +85,6 @@ npm start
 
 - 顶部与路线区支持拖动折叠，路线浮窗可移动与限幅缩放；放大枢纽、路线浮窗与当前时钟，补全跨城及出站换乘票价。
 
-**2026-11-05 · 首次发布**
-
-- 支持多起点路线比较、校门接驳、途中汇合与交通枢纽估时，适配电脑和手机。
-- 提供三所大学的示例数据，可自行扩展学校、校区与校门。
 <!-- recent-updates:end -->
 
 [完整更新日志](docs/CHANGELOG.md)

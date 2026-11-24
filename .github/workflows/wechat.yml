@@ -1,0 +1,60 @@
+name: 微信小程序 · 预览与上传
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 操作（preview 生成预览码，upload 上传开发版）
+        type: choice
+        options: [preview, upload]
+        default: preview
+        required: true
+      version:
+        description: 微信开发版本号
+        type: string
+        default: '0.1.0'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wechat-miniprogram-ci
+  cancel-in-progress: false
+
+jobs:
+  wechat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 构建并测试小程序
+        run: |
+          npm run build:wechat
+          node --test tools/tests/wechat.test.mjs
+      - name: 安装微信官方上传工具
+        run: npm install --prefix "$RUNNER_TEMP/wechat-sdk" --no-save --no-audit --no-fund miniprogram-ci@2.1.31
+      - name: 预览或上传开发版
+        run: node tools/wechat-ci.cjs
+        env:
+          WECHAT_TASK: ${{ inputs.task }}
+          WECHAT_VERSION: ${{ inputs.version }}
+          WECHAT_APPID: ${{ vars.WECHAT_APPID }}
+          WECHAT_UPLOAD_KEY: ${{ secrets.WECHAT_UPLOAD_KEY }}
+          WECHAT_API_BASE: ${{ vars.WECHAT_API_BASE }}
+          WECHAT_CLOUD_ENV: ${{ vars.WECHAT_CLOUD_ENV }}
+          WECHAT_CLOUD_SERVICE: ${{ vars.WECHAT_CLOUD_SERVICE }}
+          WECHAT_CI_PROXY: ${{ secrets.WECHAT_CI_PROXY }}
+      - name: 保存预览二维码
+        if: inputs.task == 'preview'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wechat-preview-${{ github.run_id }}
+          path: ${{ runner.temp }}/wechat-preview.jpg
+          if-no-files-found: error
+          retention-days: 1

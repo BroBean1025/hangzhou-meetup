@@ -12,6 +12,8 @@
     "setup": "node tools/setup.mjs",
     "start": "node --env-file-if-exists=.env core/server.mjs",
     "build": "node tools/build.mjs",
+    "build:wechat": "node tools/build-wechat.mjs",
+    "wechat:dev": "node --env-file-if-exists=.env wechat/dev-server.mjs",
     "doctor": "node --env-file-if-exists=.env tools/doctor.mjs",
     "test": "node --test tools/tests/*.test.mjs",
     "check:release": "node tools/check-release.mjs",

@@ -1,0 +1,14 @@
+{
+  "description": "Hangzhou MeetUp · 杭城同行",
+  "projectname": "hangzhou-meetup",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "miniprogram/",
+  "appid": "touristappid",
+  "setting": {
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": true,
+    "enhance": true
+  }
+}

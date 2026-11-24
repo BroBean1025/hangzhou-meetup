@@ -1,0 +1,106 @@
+<view class="screen">
+  <view class="top">
+    <view class="search" data-id="destination" bindtap="openPicker"><text class="lens">⌕</text><text>{{targetName || '搜索目的地地铁站'}}</text></view>
+    <button wx:if="{{targetName}}" class="quiet" bindtap="clear">清除</button>
+    <text class="clock">{{current}}</text>
+  </view>
+  <map id="metro" class="map" longitude="{{longitude}}" latitude="{{latitude}}" scale="{{scale}}" markers="{{markers}}" polyline="{{polyline}}" polygons="{{polygons}}"
+    bindtap="mapTap" bindpoitap="mapTap" bindmarkertap="markerTap" bindcallouttap="markerTap" bindregionchange="regionChanged" enable-rotate="{{false}}" show-location="{{false}}" />
+  <view class="tabs">
+    <button class="{{tab==='origins'?'active':''}}" data-id="origins" bindtap="switchTab">起点 {{selectedCount}}</button>
+    <button class="{{tab==='hubs'?'active':''}}" data-id="hubs" bindtap="switchTab">交通枢纽</button>
+    <button class="{{tab==='results'?'active':''}}" data-id="results" bindtap="switchTab">路线</button>
+    <button class="{{tab==='time'?'active':''}}" data-id="time" bindtap="switchTab">时间规划</button>
+    <button class="quiet" bindtap="toggleFold">{{folded?'展开':'收起'}}</button>
+  </view>
+  <scroll-view wx:if="{{!folded}}" class="sheet" scroll-y enhanced>
+    <view class="content">
+    <block wx:if="{{picking}}">
+      <view class="heading"><text>{{picking==='origin'?'添加地铁站出发点':'选择目的地'}}</text><button class="quiet" bindtap="cancelPicker">取消</button></view>
+      <input class="field" placeholder="输入站名，例如 杭州东" value="{{search}}" bindinput="searchInput"/>
+      <scroll-view scroll-x class="line-scroll"><view class="line-list"><button class="chip {{lineId===item.id?'on':''}}" wx:for="{{lineFilters}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseLine">{{item.name}}</button></view></scroll-view>
+      <view wx:for="{{choices}}" wx:key="id" class="row pick" data-id="{{item.id}}" bindtap="choose"><text>{{item.name}}</text><text class="muted small">{{item.lines}}</text></view>
+      <text wx:if="{{!choices.length}}" class="muted">没有匹配的地铁站</text>
+    </block>
+    <block wx:elif="{{tab==='hubs'}}">
+      <view class="heading"><text>{{primaryName}}出发</text><text class="muted small">到交通枢纽</text></view>
+      <view wx:for="{{hubRows}}" wx:key="id" class="row" data-id="{{item.id}}" bindtap="choose">
+        <image class="icon" src="{{item.icon}}"/><text class="grow">{{item.name}}</text><text class="amount">{{item.time}}</text><text class="chev">›</text>
+      </view>
+      <text class="note" wx:if="{{hubNote}}">{{hubNote}}</text>
+      <button wx:if="{{hubError}}" class="chip" bindtap="loadHubs">重试枢纽估时</button>
+    </block>
+    <block wx:elif="{{tab==='origins'}}">
+      <view class="heading"><text>出发点</text><button class="chip on" data-id="origin" bindtap="openPicker">＋ 地铁站</button></view>
+      <block wx:for="{{schools}}" wx:key="id" wx:for-item="school">
+        <view class="row group" data-id="{{school.id}}" bindtap="toggleSchool"><text class="grow">{{school.name}}</text><text class="muted">{{school.count}} 个已选 {{school.open?'▴':'▾'}}</text></view>
+        <block wx:if="{{school.open}}">
+          <view class="origin" wx:for="{{school.rows}}" wx:key="id" wx:for-item="o">
+            <view class="row plain">
+              <button class="namebtn grow" data-id="{{o.id}}" data-action="toggle" bindtap="changeOrigin"><text class="check">{{o.enabled?'☑':'□'}}</text> {{o.campus_name}}</button>
+              <button class="chip {{o.primary?'on':''}}" data-id="{{o.id}}" data-action="main" bindtap="changeOrigin">{{o.primary?'主起点':'设为主'}}</button>
+            </view>
+            <block wx:if="{{o.enabled}}">
+              <button class="gates" data-id="{{o.id}}" bindtap="toggleGates">{{o.gateText}} ▾</button>
+              <view class="chips" wx:if="{{gateEditor===o.id}}"><button wx:for="{{o.gates}}" wx:key="key" wx:for-item="gate" class="chip {{gate.on?'on':''}}" data-id="{{o.id}}" data-action="gate" data-value="{{gate.key}}" bindtap="changeOrigin">{{gate.label}}</button></view>
+              <view class="chips"><button wx:for="{{modeList}}" wx:key="id" wx:for-item="mode" class="chip {{o.mode===mode.id?'on':''}}" data-action="mode" data-value="{{mode.id}}" data-id="{{o.id}}" bindtap="changeOrigin">{{mode.label}}</button></view>
+            </block>
+          </view>
+        </block>
+      </block>
+      <view wx:for="{{custom}}" wx:key="id" class="row">
+        <button class="namebtn grow" data-id="{{item.id}}" data-action="toggle" bindtap="changeOrigin">{{item.enabled?'☑':'□'}} {{item.short_name}}</button>
+        <button class="chip {{item.primary?'on':''}}" data-id="{{item.id}}" data-action="main" bindtap="changeOrigin">{{item.primary?'主起点':'设为主'}}</button>
+        <button class="quiet" data-id="{{item.id}}" data-action="remove" bindtap="changeOrigin">移除</button>
+      </view>
+    </block>
+    <block wx:elif="{{tab==='results'}}">
+      <view class="heading"><text>{{targetName||'选择目的地'}}</text><button wx:if="{{cards.length}}" class="quiet" bindtap="overview">路线全览</button></view>
+      <view class="chips">
+        <button class="chip {{strategy==='time'?'on':''}}" data-id="time" bindtap="pref">时间优先</button>
+        <button class="chip {{strategy==='transfers'?'on':''}}" data-id="transfers" bindtap="pref">少换乘</button>
+        <button wx:if="{{isEast}}" class="chip {{east?'on':''}}" data-id="east" bindtap="pref">{{east?'☑':'□'}} 最多多花10分钟优先1/4号线站区</button>
+      </view>
+      <text class="note">{{status || '搜索车站或轻点地图，即可比较各起点的行程。'}}</text>
+      <view wx:if="{{sharedIds.length}}" class="chips"><text>此段同行</text><button wx:for="{{sharedIds}}" wx:key="id" class="chip" data-id="{{item.id}}" bindtap="pickShared">{{item.label}}</button></view>
+      <view wx:for="{{cards}}" wx:for-item="r" wx:key="id" class="card">
+        <view class="card-head"><text class="badge" style="background-color:{{r.color}}">{{r.number}}</text><text class="grow">{{r.name}}</text><text class="amount">{{r.time}}</text></view>
+        <text wx:if="{{r.error}}" class="error">{{r.error}}</text>
+        <block wx:else>
+          <text class="note">{{r.gate}} · 换乘 {{r.transfers}} 次 · {{r.fare}} {{r.station}}</text>
+          <view class="chips"><button class="chip {{focus===r.id?'on':''}}" data-id="{{r.id}}" bindtap="focusRoute">{{focus===r.id?'显示全部路线':'单看此线'}}</button><button class="chip" data-id="{{r.id}}" bindtap="details">{{detail===r.id?'收起明细':'行程明细'}}</button></view>
+          <block wx:if="{{detail===r.id}}">
+            <text class="note">{{r.bits}}</text>
+            <view class="chips" wx:if="{{r.alternatives.length>1}}"><button wx:for="{{r.alternatives}}" wx:for-item="alt" wx:key="id" class="chip {{alt.active?'on':''}}" data-id="{{r.id}}" data-choice="{{alt.id}}" bindtap="alternative">{{alt.title}}</button></view>
+            <view class="leg" wx:for="{{r.legs}}" wx:for-item="leg" wx:key="index">
+              <view class="leg-title"><text class="swatch" style="background-color:{{leg.color}}"></text>{{leg.name}} · {{leg.time}}</view><text class="small">{{leg.stops}}</text>
+            </view>
+            <view class="leg" wx:for="{{r.walks}}" wx:for-item="walk" wx:key="index">
+              <view class="row plain"><text class="grow">{{walk.label}} · {{walk.time}}</text><button wx:if="{{walk.hasPath}}" class="chip" data-id="{{r.id}}" data-index="{{walk.index}}" bindtap="fitWalk">看接驳</button></view>
+              <text wx:if="{{!walk.hasPath || walk.partial}}" class="note">{{walk.partial?'部分路段缺少轨迹':'暂无可显示轨迹'}}</text>
+              <text class="note" wx:for="{{walk.instructions}}" wx:for-item="step" wx:key="*this">{{step}}</text>
+            </view>
+            <text class="note">{{r.note}}</text>
+          </block>
+        </block>
+      </view>
+      <button wx:if="{{targetName && !busy}}" class="quiet" bindtap="retry">重新查询</button>
+    </block>
+    <block wx:elif="{{tab==='time'}}">
+      <view class="heading"><text>到达与汇合</text><button class="chip {{planning?'on':''}}" bindtap="togglePlan">{{planning?'关闭倒推':'设置到达时间'}}</button></view>
+      <block wx:if="{{planning}}">
+        <view class="chips"><button class="chip" data-id="30" bindtap="arrivalAfter">30 分钟后</button><button class="chip" data-id="60" bindtap="arrivalAfter">1 小时后</button><button class="chip" data-id="90" bindtap="arrivalAfter">1.5 小时后</button></view>
+        <view class="row"><text class="grow">期望到达</text><picker mode="date" value="{{date}}" data-id="date" bindchange="planInput"><view class="box">{{date}}</view></picker><picker mode="time" value="{{arrival}}" data-id="arrival" bindchange="planInput"><view class="box">{{arrival}}</view></picker></view>
+        <view class="row"><text class="grow">途中缓冲（分钟）</text><input class="num" type="number" maxlength="3" value="{{buffer}}" data-id="buffer" bindinput="planInput"/></view>
+        <view class="row"><text class="grow">汇合预留（分钟）</text><input class="num" type="number" maxlength="2" value="{{meetingBuffer}}" data-id="meetingBuffer" bindinput="planInput"/></view>
+        <text wx:if="{{planError}}" class="error">{{planError}}</text>
+        <view class="row" wx:for="{{schedules}}" wx:key="id"><text class="grow">{{item.name}}</text><text>{{item.depart}} 出发 · {{item.arrival}} 到达</text><text wx:if="{{item.late}}" class="error">已过出发时间</text></view>
+      </block>
+      <text wx:if="{{!targetName}}" class="note">选好目的地后可查看出发与汇合安排。</text>
+      <view wx:for="{{meetingRows}}" wx:key="key" class="card"><view class="card-head"><text class="grow">{{item.name}}汇合</text><button class="chip" data-id="{{item.sid}}" bindtap="locateMeeting">看汇合站</button></view><text class="note">{{item.group}}</text><text>{{item.trunk}}</text><text class="note">{{item.entries}}</text><text class="amount">{{item.at}}</text></view>
+      <text wx:if="{{targetName && !busy && !meetingRows.length}}" class="note">当前已取得的路线没有在目的地前汇入同一方向的路段。</text>
+    </block>
+    <text class="source">OpenMetro · 杭州及跨城轨道快照 {{updated}} / {{regionalDate}} · 校区边界 © OpenStreetMap 贡献者 · 接驳按高德可用数据。静态估时，候车及安检另留。</text>
+    </view>
+  </scroll-view>
+</view>
