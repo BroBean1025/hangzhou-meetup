@@ -3,12 +3,13 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 export const root=fileURLToPath(new URL('../',import.meta.url));
 const top=new Set(['package.json','pnpm-lock.yaml','pnpm-workspace.yaml','README.md','LICENSE','.env.example','.gitignore','.gitattributes','启动地图.cmd']);
-const folders=new Set(['core','desktop','tools','docs','.github']);
+const folders=new Set(['core','desktop','tools','docs','wechat','.github']);
 export async function releaseFiles(){
  const files=[];
  async function walk(dir,relative=''){
   for(const e of await readdir(dir,{withFileTypes:true})){
    const name=relative?relative+'/'+e.name:e.name;
+   if(name==='wechat/project.private.config.json'||name==='wechat/miniprogram_npm')continue;
    if(!relative&&!top.has(e.name)&&!folders.has(e.name))continue;
    if(e.isSymbolicLink())throw new Error('发布目录不能包含符号链接：'+name);
    if(e.isDirectory())await walk(path.join(dir,e.name),name);

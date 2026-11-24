@@ -1,0 +1,12 @@
+{
+  "pages": [
+    "pages/map/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "Hangzhou MeetUp · 杭城同行",
+    "navigationBarBackgroundColor": "#f8f6ed",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8f6ed"
+  },
+  "sitemapLocation": "sitemap.json"
+}

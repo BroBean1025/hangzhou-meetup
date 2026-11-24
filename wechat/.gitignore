@@ -1,0 +1,4 @@
+project.private.config.json
+miniprogram_npm/
+*.key
+*.pem

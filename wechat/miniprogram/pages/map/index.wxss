@@ -1,0 +1,47 @@
+page {height:100%; background:#f8f6ed; color:#2d4239; font-family:sans-serif; font-size:28rpx}
+.screen {height:100%; display:flex; flex-direction:column; box-sizing:border-box; padding-bottom:env(safe-area-inset-bottom)}
+.top,.tabs,.row,.heading,.card-head,.chips,.line-list,.leg-title {display:flex; align-items:center; gap:12rpx}
+.top {padding:14rpx 22rpx; background:#f8f6ed}
+.search,.field,.box,.num {background:#fffdf6; border:1px solid #d4d9c9; border-radius:12rpx}
+.search {flex:1; min-width:0; padding:12rpx 18rpx; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lens {font-size:34rpx; margin-right:12rpx}
+.clock,.amount {font-weight:600; font-variant-numeric:tabular-nums}
+.clock,.chev,.muted,.note,.source {color:#627268}
+.map {width:100%; flex:1; min-height:0}
+.tabs {padding:8rpx 10rpx; gap:2rpx; border-top:1px solid #cad1bc; border-bottom:1px solid #dce1d3; justify-content:space-around}
+button {font:inherit; color:inherit; background:transparent; padding:0; margin:0; border:0; line-height:1.5; border-radius:0}
+button::after {border:none}
+.tabs button,.quiet {padding:8rpx; font-size:25rpx}
+.active,.on,.check {color:#305b42; font-weight:600}
+.tabs .active {border-bottom:4rpx solid #577357}
+.sheet {height:43%; flex:none}
+.content {padding:10rpx 24rpx 24rpx}
+.heading {justify-content:space-between; font-size:33rpx; font-weight:600; padding:10rpx 0 16rpx}
+.row {padding:15rpx 0; border-bottom:1px solid #dde1d2; flex-wrap:wrap}
+.row.pick {justify-content:space-between}
+.grow {flex:1; min-width:0}
+.row.plain {border:0; padding:4rpx 0}
+.icon {width:38rpx; height:38rpx}
+.chev {margin-left:8rpx}
+.chips {flex-wrap:wrap; margin:8rpx 0}
+.chip,.box,.num {font-size:24rpx; border:1px solid #c1cbb9; border-radius:10rpx; padding:7rpx 14rpx; line-height:1.45}
+.chip.on {background:#dfebdc; border-color:#829882}
+.line-scroll {width:100%; margin:10rpx 0}
+.line-list {display:inline-flex; white-space:nowrap}
+.line-list .chip {flex:none}
+.field {padding:12rpx 16rpx}
+.namebtn,.gates {text-align:left}
+.origin {border-left:4rpx solid #bccbb7; padding:10rpx 16rpx; margin:10rpx 0}
+.gates {padding:9rpx 0; font-size:25rpx}
+.small,.note {font-size:24rpx}
+.note,.source,.error {display:block; margin:10rpx 0; line-height:1.55; overflow-wrap:break-word}
+.source {font-size:20rpx; border-top:1px solid #dde2d3; padding-top:12rpx; margin-top:24rpx}
+.error {color:#914c35; font-size:25rpx}
+.card {padding:16rpx; margin:12rpx 0; background:#fffdf6; border:1px solid #d5dcca; border-radius:14rpx}
+.card-head {font-weight:600}
+.badge {color:white; font-size:22rpx; min-width:36rpx; height:36rpx; line-height:36rpx; border-radius:50%; text-align:center}
+.num {width:68rpx; text-align:center}
+.leg {padding:12rpx 0; border-top:1px solid #e3e7da}
+.leg-title {font-weight:600; margin-bottom:5rpx}
+.swatch {width:22rpx; height:8rpx; border-radius:5rpx}
+@media (orientation:landscape) {.sheet {height:38%}.top,.tabs {padding-top:2rpx; padding-bottom:2rpx}}
